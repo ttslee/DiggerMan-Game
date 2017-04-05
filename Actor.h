@@ -411,6 +411,7 @@ public:
 	Sonar(StudentWorld* sw, int startX, int startY) :
 		Goodie(sw, IMID_SONAR, startX, startY)
 	{
+	setVisible(true);
 	}
 	virtual void doSomething();
 	auto initLifeTicks()->void;
