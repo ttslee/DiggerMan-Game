@@ -215,7 +215,7 @@ void StudentWorld::fillGoodies(int randX, int randY, ActorType gdy)
 				} while (b < m_actors.size());
 				if (b == m_actors.size()) {
 					if (gdy == gold)
-						m_actors.emplace_back(std::make_shared<Nugget>(this, randX, randY, true));
+						m_actors.emplace_back(std::make_shared<Nugget>(this, randX, randY));
 					else
 						m_actors.emplace_back(std::make_shared<Oil>(this, randX, randY));
 					break;
