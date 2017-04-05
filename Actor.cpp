@@ -1,6 +1,6 @@
 #include "Actor.h"
 #include "StudentWorld.h"
-
+#include <algorithm>
 enum Direction;
 // Students:  Add code to this file (if you wish), Actor.h, StudentWorld.h, and StudentWorld.cpp
 double Actor::distanceFromActor(std::shared_ptr<Actor> a)
@@ -608,8 +608,18 @@ void Protester::protesterAction(Direction dir)
 	switch (dir)
 	{
 	case up:
+		if (getY() < 60)
+		{
+			moveTo(getX() - 1, getY());
+			incSquaresWalked();
+		}
 		break;
 	case down:
+		if (getY() > 0)
+		{
+			moveTo(getX() - 1, getY());
+			incSquaresWalked();
+		}
 		break;
 	case left:
 		if (getX() > 0)
@@ -619,6 +629,11 @@ void Protester::protesterAction(Direction dir)
 		}
 		break;
 	case right:
+		if (getX() < 60)
+		{
+			moveTo(getX() - 1, getY());
+			incSquaresWalked();
+		}
 		break;
 	}
 	if (isTypeActorInFront(getDirection(), digger))
@@ -757,5 +772,5 @@ void Sonar::doSomething()
 }
 auto Sonar::initLifeTicks()->void
 {
-	m_life_ticks = max(100,( 300 - 10 * static_cast<int>(getWorld()->getLevel())));
+	m_life_ticks = std::max(100,(300 - 10 * static_cast<int>(getWorld()->getLevel())));
 }
