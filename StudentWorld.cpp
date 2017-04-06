@@ -51,7 +51,7 @@ int StudentWorld::init()
 
 int StudentWorld::move()
 {
-	
+
 	if (!m_diggerMan->isDead())
 	{
 		high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -64,21 +64,20 @@ int StudentWorld::move()
 		}
 		/*else if (m_ticks % m_protTicks == 0 && m_protesterCount < m_maxProt)
 		{
-			int regOrhard = rand() % 100;
-			if (regOrhard < m_probHard)
-				m_protesters.emplace_back(make_shared<HardcoreProtester>(this));
-			else
-				m_protesters.emplace_back(make_shared<RegularProtester>(this));
-			m_protesterCount++;
+		int regOrhard = rand() % 100;
+		if (regOrhard < m_probHard)
+		m_protesters.emplace_back(make_shared<HardcoreProtester>(this));
+		else
+		m_protesters.emplace_back(make_shared<RegularProtester>(this));
+		m_protesterCount++;
 		}*/
 		else if (rand() % m_probGoodie == 1)
 		{
-			/*if ((rand() % 5 + 1) < 4)
+			if ((rand() % 5 + 1) < 4)
 			{
-
 				m_actors.emplace_back(make_shared<Water>(this, 4, 60));
 			}
-			else*/
+			else
 				m_actors.emplace_back(make_shared<Sonar>(this, 0, 60));
 		}
 		m_diggerMan->doSomething();
@@ -92,7 +91,7 @@ int StudentWorld::move()
 			if (!p->isDead())
 				p->doSomething();
 		}
-		
+		getDiggerMan()->setSonarFlag(false);
 		high_resolution_clock::time_point t2 = high_resolution_clock::now();
 		auto duration = duration_cast<milliseconds>(t2 - t1).count();
 
@@ -108,7 +107,7 @@ int StudentWorld::move()
 			playSound(SOUND_PLAYER_GIVE_UP);
 		return GWSTATUS_PLAYER_DIED;
 	}
-	
+
 }
 
 void StudentWorld::cleanUp()
@@ -122,13 +121,13 @@ void StudentWorld::cleanUp()
 	m_dirt.clear();
 }
 
-std::string StudentWorld::formatGameStats() const 
+std::string StudentWorld::formatGameStats() const
 {
 	ostringstream os;
 
 	os << left << "Lvl: " << setw(2) << getLevel() << " Hlth: " << setw(3) << m_diggerMan->getHealth() << "% Wtr: "
 		<< setw(2) << (m_diggerMan->getNumSquirts() * 10) << " Gld: " << setw(2) << m_diggerMan->getGold()
-		<< " Sonar: " << setw(2) << m_diggerMan->getSonar() << " Oil Left: " << setw(2) << getOil()
+		<< " Sonar: " << setw(2) << m_diggerMan->getSonarCount() << " Oil Left: " << setw(2) << getOil()
 		<< " Scr: " << setfill('0') << setw(6) << getScore();
 
 	return os.str();
@@ -227,7 +226,7 @@ void StudentWorld::fillDirt() {
 	for (int i = 0; i < 60; i++)
 	{
 		m_dirt.push_back(std::vector<std::unique_ptr<Dirt>>());
-		for (int j = 0; j < 64; j++) 
+		for (int j = 0; j < 64; j++)
 		{
 			if ((i >= 4) && (j >= 30 && j <= 33))
 			{
@@ -271,7 +270,7 @@ void StudentWorld::initProbGoodie()
 {
 	m_probGoodie = getLevel() * 25 + 300;
 }
-void StudentWorld::incTicks() 
+void StudentWorld::incTicks()
 {
 	m_ticks++;
 }

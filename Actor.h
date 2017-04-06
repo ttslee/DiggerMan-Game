@@ -26,17 +26,17 @@ public:
 	}
 	virtual void doSomething() = 0;
 	virtual bool isDirt();
-	void setDead(bool state)	
-	{ 
-		m_isDead = state; 
+	void setDead(bool state)
+	{
+		m_isDead = state;
 	}
 	const bool isDead()
 	{
-		return m_isDead; 
+		return m_isDead;
 	}
-	StudentWorld* getWorld()	
+	StudentWorld* getWorld()
 	{
-		return m_student_world; 
+		return m_student_world;
 	}
 	std::shared_ptr<DiggerMan> getDigger();
 	double distanceFromActor(std::shared_ptr<Actor>);
@@ -69,18 +69,18 @@ public:
 		std::cout << "Boulder Created" << std::endl;
 	}
 	virtual void doSomething();
-	
+
 	auto setFalling(bool flag)->void
 	{
 		m_Falling = flag;
 	}
-	auto isFalling()->bool 
-	{ 
-		return m_Falling; 
-	}
-	auto setBelowFlag(bool flag)->void 
+	auto isFalling()->bool
 	{
-		m_belowFlag = flag; 
+		return m_Falling;
+	}
+	auto setBelowFlag(bool flag)->void
+	{
+		m_belowFlag = flag;
 	}
 private:
 	auto isDirtBelow()->bool;
@@ -125,7 +125,7 @@ public:
 	{
 		m_shotFlag = flag;
 	}
-	
+
 private:
 	bool m_shotFlag;
 	int m_distance;
@@ -135,19 +135,24 @@ class DiggerMan : public Actor
 {
 public:
 	DiggerMan(StudentWorld* sw) :
-		Actor(sw, IMID_PLAYER, 30, 60), 
+		Actor(sw, IMID_PLAYER, 30, 60),
 		m_gun(),
 		m_gunFlag(false),
+		m_sonarFlag(false),
 		m_health(100),
 		m_numSquirts(5),
 		m_digFlag(true),
 		m_gold(0),
-		m_sonar(0)
+		m_sonarCount(0)
 	{
 		setVisible(true);
 	}
 	virtual void doSomething();
 
+	void decSonar()
+	{
+		m_sonarCount--;
+	}
 	void decSquirts()
 	{
 		m_numSquirts--;
@@ -156,17 +161,17 @@ public:
 	{
 		m_gold--;
 	}
-	void incGold() 
+	void incGold()
 	{
-		m_gold++; 
+		m_gold++;
 	}
 	void incWater()
 	{
-		m_sonar++; 
+		m_numSquirts += 5;
 	}
 	void incSonar()
 	{
-		m_sonar++;
+		m_sonarCount++;
 	}
 	const int getHealth()
 	{
@@ -180,11 +185,22 @@ public:
 	{
 		return m_gold;
 	}
-	const int getSonar()
+	const int getSonarCount()
 	{
-		return m_sonar;
+		return m_sonarCount;
 	}
-
+	const int getSonarFlag()
+	{
+		return m_sonarFlag;
+	}
+	const int getSonarDuration()
+	{
+		return m_sonarDuration;
+	}
+	void setSonarFlag(bool flag)
+	{
+		m_sonarFlag = flag;
+	}
 	void setHealth(int damage);
 	void setGunFlag(bool flag)
 	{
@@ -192,17 +208,21 @@ public:
 	}
 	bool isBoulder(Direction dir);
 	void dropGold();
+	void initSonarDuration();
 protected:
 	void diggerAction();
 	void shoot();
 private:
 	std::shared_ptr<Squirt> m_gun;
 	bool m_gunFlag;
+	bool m_digFlag;
+	bool m_sonarFlag;
+	int  m_sonarCount;
+	int m_sonarDuration;
 	int	 m_health;
 	int	 m_numSquirts;
-	bool m_digFlag;
 	int  m_gold;
-	int  m_sonar;
+
 };
 
 //*********************PROTESTERS**************************
@@ -216,7 +236,7 @@ public:
 		m_tick_count(1),
 		m_current_dir(left),
 		m_squares_walked(1),
-		m_leave_state(false), 
+		m_leave_state(false),
 		m_wait_state(false),
 		m_stunned(false)
 	{
@@ -347,13 +367,13 @@ public:
 	{
 	}
 	virtual void doSomething(){}
-	void setDiggerState(bool state)		
-	{ 
-		m_digger_state = state; 
+	void setDiggerState(bool state)
+	{
+		m_digger_state = state;
 	}
-	void setProtesterState(bool state)	
-	{ 
-		m_protester_state = state; 
+	void setProtesterState(bool state)
+	{
+		m_protester_state = state;
 	}
 
 	const bool getDiggerState()
@@ -366,9 +386,9 @@ public:
 	}
 	void getPickedUp();
 	void setPickedUp(bool flag);
-	bool isPickedUp()					
-	{ 
-		return m_pickedUp; 
+	bool isPickedUp()
+	{
+		return m_pickedUp;
 	}
 
 private:
@@ -384,7 +404,7 @@ public:
 	Nugget(StudentWorld* sw, int startX, int startY, bool setV = false, bool digSt = true, bool protSt = false) :
 		Goodie(sw, IMID_GOLD, startX, startY, 2, digSt, protSt)
 	{
-		setVisible(setV); 
+		setVisible(setV);
 	}
 	virtual void doSomething();
 };
@@ -395,7 +415,7 @@ public:
 	Oil(StudentWorld* sw, int startX, int startY) :
 		Goodie(sw, IMID_BARREL, startX, startY)
 	{
-		setVisible(false); 
+		setVisible(false);
 	}
 	virtual void doSomething();
 };
@@ -404,11 +424,16 @@ class Water : public Goodie
 {
 public:
 	Water(StudentWorld* sw, int startX, int startY) :
-		Goodie(sw, IMID_WATER_POOL, startX, startY)
+		Goodie(sw, IMID_WATER_POOL, startX, startY),
+		m_ticks(0)
 	{
 		setVisible(true);
 	}
 	virtual void doSomething();
+	auto initLifeTicks()->void;
+private:
+	int m_life_ticks;
+	int m_ticks;
 };
 
 class Sonar : public Goodie
