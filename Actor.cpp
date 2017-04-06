@@ -9,28 +9,6 @@ bool Actor::isDirt()
 {
 	bool flag = false;
 	int i = 0;
-	/*for (auto & y : *(getWorld()->getDirt()))
-	{
-		if (y[i]->getY() - getY() >= 4)
-			break;
-		if (y[i]->getY() < getY())
-		{
-			i++;
-			continue;
-		}
-		for (auto & x : y)
-		{
-			if (x->isDead())
-				continue;
-			if ((x->getX() - getX()) >= 0 && (x->getX() - getX()) <= 3 && (x->getY() - getY()) >= 0 && (x->getY() - getY()) <= 3)
-			{
-				x->setVisible(false);
-				x->setDead(true);
-				flag = true;
-			}
-		}
-		i++;
-	}*/
 	
 	if (getY() < 60)
 	{
