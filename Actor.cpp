@@ -1,6 +1,5 @@
 #include "Actor.h"
 #include "StudentWorld.h"
-// Students:  Add code to this file (if you wish), Actor.h, StudentWorld.h, and StudentWorld.cpp
 double Actor::distanceFromActor(std::shared_ptr<Actor> a)
 {
 	return sqrt(pow(getX() - a->getX(), 2) + pow(getY() - a->getY(), 2));
@@ -9,7 +8,29 @@ bool Actor::isDirt()
 {
 	bool flag = false;
 	int i = 0;
-	
+	/*for (auto & y : *(getWorld()->getDirt()))
+	{
+	if (y[i]->getY() - getY() >= 4)
+	break;
+	if (y[i]->getY() < getY())
+	{
+	i++;
+	continue;
+	}
+	for (auto & x : y)
+	{
+	if (x->isDead())
+	continue;
+	if ((x->getX() - getX()) >= 0 && (x->getX() - getX()) <= 3 && (x->getY() - getY()) >= 0 && (x->getY() - getY()) <= 3)
+	{
+	x->setVisible(false);
+	x->setDead(true);
+	flag = true;
+	}
+	}
+	i++;
+	}*/
+
 	if (getY() < 60)
 	{
 		std::vector<std::vector<std::unique_ptr<Dirt>>>* dirt = getWorld()->getDirt();
@@ -90,43 +111,43 @@ bool Actor::isTypeActorInFront(Direction dir, ActorType type)
 		}
 		/*for (auto & p : getWorld()->getProtesters())
 		{
-			switch (dir)
-			{
-			case up:
-				if (isAbove(static_cast<std::shared_ptr<Actor>>(p)) && (p->getX() - getX() <= SPRITE_HEIGHT))
-				{
-					p->decHealth();
-					getWorld()->playSound(SOUND_PROTESTER_ANNOYED);
-					return true;
-				}
-				break;
-			case down:
-				if (isBelow(static_cast<std::shared_ptr<Actor>>(p)) && (p->getX() - getX() <= SPRITE_HEIGHT))
-				{
-					p->decHealth();
-					getWorld()->playSound(SOUND_PROTESTER_ANNOYED);
-					return true;
-				}
-				break;
-			case left:
-				if (isLeft(static_cast<std::shared_ptr<Actor>>(p)) && (p->getX() - getX() <= SPRITE_WIDTH))
-				{
-					p->decHealth();
-					getWorld()->playSound(SOUND_PROTESTER_ANNOYED);
-					return true;
-				}
-				break;
-			case right:
-				if (isRight(static_cast<std::shared_ptr<Actor>>(p)) && (p->getX() - getX() <= SPRITE_WIDTH))
-				{
-					p->decHealth();
-					getWorld()->playSound(SOUND_PROTESTER_ANNOYED);
-					return true;
-				}
-				break;
-			default:
-				return false;
-			}
+		switch (dir)
+		{
+		case up:
+		if (isAbove(static_cast<std::shared_ptr<Actor>>(p)) && (p->getX() - getX() <= SPRITE_HEIGHT))
+		{
+		p->decHealth();
+		getWorld()->playSound(SOUND_PROTESTER_ANNOYED);
+		return true;
+		}
+		break;
+		case down:
+		if (isBelow(static_cast<std::shared_ptr<Actor>>(p)) && (p->getX() - getX() <= SPRITE_HEIGHT))
+		{
+		p->decHealth();
+		getWorld()->playSound(SOUND_PROTESTER_ANNOYED);
+		return true;
+		}
+		break;
+		case left:
+		if (isLeft(static_cast<std::shared_ptr<Actor>>(p)) && (p->getX() - getX() <= SPRITE_WIDTH))
+		{
+		p->decHealth();
+		getWorld()->playSound(SOUND_PROTESTER_ANNOYED);
+		return true;
+		}
+		break;
+		case right:
+		if (isRight(static_cast<std::shared_ptr<Actor>>(p)) && (p->getX() - getX() <= SPRITE_WIDTH))
+		{
+		p->decHealth();
+		getWorld()->playSound(SOUND_PROTESTER_ANNOYED);
+		return true;
+		}
+		break;
+		default:
+		return false;
+		}
 		}*/
 	}
 	return false;
@@ -165,7 +186,7 @@ void Squirt::doSomething()
 	{
 		switch (getDirection())
 		{
-		case up:	
+		case up:
 			moveTo(getX(), getY() + 1);
 			break;
 		case down:
@@ -226,29 +247,29 @@ bool Boulder::isDirtBelow()
 		int count = 0;
 		for (auto & y : getWorld()->getDirt())
 		{
-			if (getY() - y[i]->getY() > 1 || getY() - y[i]->getY() < 1)
-			{
-				i++;
-				continue;
-			}
-			for (auto & x : y)
-			{
-				
-				if (getY() - x->getY() != 1)
-					continue;
-				if (x->isDead() && (x->getX() - getX() >= 0) && (x->getX() - getX() <= 3))
-				{
-					count++;
-					if (count == 4)
-					{
-						setBelowFlag(false);
-						break;
-					}
-				}
-			}
-			if (!m_belowFlag)
-				break;
-			i++;
+		if (getY() - y[i]->getY() > 1 || getY() - y[i]->getY() < 1)
+		{
+		i++;
+		continue;
+		}
+		for (auto & x : y)
+		{
+
+		if (getY() - x->getY() != 1)
+		continue;
+		if (x->isDead() && (x->getX() - getX() >= 0) && (x->getX() - getX() <= 3))
+		{
+		count++;
+		if (count == 4)
+		{
+		setBelowFlag(false);
+		break;
+		}
+		}
+		}
+		if (!m_belowFlag)
+		break;
+		i++;
 		}*/
 		auto count = 0;
 		std::vector<std::vector<std::unique_ptr<Dirt>>>* dirt = getWorld()->getDirt();
@@ -268,28 +289,28 @@ bool Boulder::isDirtBelow()
 		int count = 0;
 		for (auto & y : getWorld()->getDirt())
 		{
-			if (getY() - y[i]->getY() > 1)
-			{
-				i++;
-				continue;
-			}
-			for (auto & x : y)
-			{
-				if (getY() - x->getY() != 1)
-					continue;
-				if (!x->isDead() && (x->getX() - getX() >= 0) && (x->getX() - getX() <= 3))
-				{
-					count++;
-					if (count == 4)
-					{
-						setBelowFlag(true);
-						break;
-					}
-				}
-			}
-			if (m_belowFlag)
-				break;
-			i++;
+		if (getY() - y[i]->getY() > 1)
+		{
+		i++;
+		continue;
+		}
+		for (auto & x : y)
+		{
+		if (getY() - x->getY() != 1)
+		continue;
+		if (!x->isDead() && (x->getX() - getX() >= 0) && (x->getX() - getX() <= 3))
+		{
+		count++;
+		if (count == 4)
+		{
+		setBelowFlag(true);
+		break;
+		}
+		}
+		}
+		if (m_belowFlag)
+		break;
+		i++;
 		}*/
 		auto count = 0;
 		std::vector<std::vector<std::unique_ptr<Dirt>>>* dirt = getWorld()->getDirt();
@@ -380,10 +401,10 @@ void DiggerMan::setHealth(int damage)
 	if (m_health <= 0)
 		setDead(true);
 }
-void DiggerMan::diggerAction()			
+void DiggerMan::diggerAction()
 {
 	int key;
-	if (getWorld()->getKey(key) == true) 
+	if (getWorld()->getKey(key) == true)
 	{
 		switch (key)
 		{
@@ -424,8 +445,7 @@ void DiggerMan::diggerAction()
 					moveTo(getX() + 1, getY());
 			}
 			break;
-		case 'z':
-		case 'Z':
+		case KEY_PRESS_TAB:
 			if (getGold() > 0)
 			{
 				dropGold();
@@ -438,9 +458,9 @@ void DiggerMan::diggerAction()
 		}
 	}
 }
-void DiggerMan::shoot()			
+void DiggerMan::shoot()
 {
-	if (m_numSquirts > 0) 
+	if (m_numSquirts > 0)
 	{
 		switch (getDirection())
 		{
@@ -673,8 +693,6 @@ void Goodie::getPickedUp()
 		setProtesterState(false);
 	setPickedUp(true);
 	setVisible(false);
-	setDead(true);
-
 }
 void Goodie::setPickedUp(bool flag)
 {
@@ -720,19 +738,29 @@ void Nugget::doSomething()
 		}
 	}
 }
-void Oil::doSomething() 
+void Oil::doSomething()
 {
-	if (distanceFromActor(getDigger()) > 4 && distanceFromActor(getDigger()) < 7)
-		setVisible(true);
-	else if (distanceFromActor(getDigger()) <= 3)
-		getPickedUp();
-	if (isPickedUp())
+	if (isDead())
+		return;
+	if (getDigger()->getSonarFlag())
 	{
-		getWorld()->decOil();
-		getWorld()->playSound(SOUND_FOUND_OIL);
+		if (distanceFromActor(getDigger()) < 12)
+			setVisible(true);
+	}
+	else
+	{
+		if (distanceFromActor(getDigger()) < 7)
+			setVisible(true);
+		else if (distanceFromActor(getDigger()) <= 3)
+			getPickedUp();
+		if (isPickedUp())
+		{
+			getWorld()->decOil();
+			getWorld()->playSound(SOUND_FOUND_OIL);
+		}
 	}
 }
-void Water::doSomething() 
+void Water::doSomething()
 {
 	if (distanceFromActor(getDigger()) > 4 && distanceFromActor(getDigger()) < 7)
 		setVisible(true);
@@ -745,11 +773,11 @@ void Water::doSomething()
 	}
 }
 
-void Sonar::doSomething() 
+void Sonar::doSomething()
 {
 	if (isDead())
 		return;
-	else
+	else if (!isPickedUp())
 	{
 		if (distanceFromActor(getDigger()) > 4 && distanceFromActor(getDigger()) < 7)
 			setVisible(true);
@@ -760,15 +788,31 @@ void Sonar::doSomething()
 			getWorld()->getDiggerMan()->incSonar();
 			getWorld()->playSound(SOUND_GOT_GOODIE);
 		}
+	}
+	if (!getActivated())
+	{
+		int key;
+		switch (getWorld()->getKey(key))
+		{
+		case 'z':
+		case 'Z':
+			getDigger()->decSonar();
+			getDigger()->setSonarFlag(true);
+			setActivated(true);
+			break;
+		}
+	}
+	else
+	{
 		m_ticks++;
 		if (m_ticks == m_life_ticks)
 		{
 			setDead(true);
-			setVisible(false);
+			getDigger()->setSonarFlag(false);
 		}
 	}
 }
 auto Sonar::initLifeTicks()->void
 {
-	m_life_ticks = std::max(100,(300 - 10 * static_cast<int>(getWorld()->getLevel())));
+	m_life_ticks = std::max(100, (300 - 10 * static_cast<int>(getWorld()->getLevel())));
 }
