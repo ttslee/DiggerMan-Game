@@ -2,10 +2,7 @@
 #define STUDENTWORLD_H_
 #include "GameWorld.h"
 #include "Actor.h"
-#include "GameConstants.h"
-#include <algorithm>
-#include <time.h>
-#include <cassert>
+#include <ctime>
 // Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
 
 class StudentWorld : public GameWorld
@@ -64,6 +61,7 @@ public:
 	{
 		return m_oilCount;
 	}
+	void getShortestPathOut(int x, int y);
 	void decOil()													
 	{ 
 		m_oilCount--;
@@ -85,7 +83,7 @@ private:
 	void initProbHard();	
 	
 	std::vector<std::shared_ptr<Actor>>				m_actors;
-	std::vector<std::shared_ptr<Protester>>	    m_protesters;
+	std::vector<std::shared_ptr<Protester>>			m_protesters;
 	std::shared_ptr<DiggerMan>						m_diggerMan;
 	std::vector<std::vector<std::unique_ptr<Dirt>>>	m_dirt;
 	

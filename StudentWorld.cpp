@@ -1,6 +1,4 @@
 #include "StudentWorld.h"
-#include <string>
-#include <iomanip>
 using namespace std;
 
 GameWorld* createStudentWorld(string assetDir)
@@ -48,7 +46,6 @@ int StudentWorld::init()
 	//		assert(distance(m_actors[i]->getX(), m_actors[j]->getX(), m_actors[i]->getY(), m_actors[j]->getY() > 6));
 	//	}
 	//}
-
 	return GWSTATUS_CONTINUE_GAME;
 }
 
@@ -65,7 +62,7 @@ int StudentWorld::move()
 			playSound(SOUND_FINISHED_LEVEL);
 			return GWSTATUS_FINISHED_LEVEL;
 		}
-		else if (m_ticks % m_protTicks == 0 && m_protesterCount < m_maxProt)
+		/*else if (m_ticks % m_protTicks == 0 && m_protesterCount < m_maxProt)
 		{
 			int regOrhard = rand() % 100;
 			if (regOrhard < m_probHard)
@@ -73,15 +70,15 @@ int StudentWorld::move()
 			else
 				m_protesters.emplace_back(make_shared<RegularProtester>(this));
 			m_protesterCount++;
-		}
+		}*/
 		else if (rand() % m_probGoodie == 1)
 		{
-			if ((rand() % 5 + 1) < 4)
+			/*if ((rand() % 5 + 1) < 4)
 			{
 
 				m_actors.emplace_back(make_shared<Water>(this, 4, 60));
 			}
-			else
+			else*/
 				m_actors.emplace_back(make_shared<Sonar>(this, 0, 60));
 		}
 		m_diggerMan->doSomething();
@@ -97,7 +94,7 @@ int StudentWorld::move()
 		}
 		
 		high_resolution_clock::time_point t2 = high_resolution_clock::now();
-		auto duration = duration_cast<nanoseconds>(t2 - t1).count();
+		auto duration = duration_cast<milliseconds>(t2 - t1).count();
 
 		std::cout << duration;
 		return GWSTATUS_CONTINUE_GAME;
@@ -241,7 +238,10 @@ void StudentWorld::fillDirt() {
 		}
 	}
 }
+void StudentWorld::getShortestPathOut(int x, int y)
+{
 
+}
 void StudentWorld::initProtTicks()
 {
 	m_protTicks = max(25, (200 - static_cast<int>(getLevel())));

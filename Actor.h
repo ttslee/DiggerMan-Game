@@ -6,6 +6,9 @@
 #include <sstream>
 #include <chrono>
 #include <iomanip>
+#include <algorithm>
+#include <string>
+#include <cassert>
 using namespace std::chrono;
 enum ActorType {
 	digger, boulder, water, gold, oil, sonar, squirt, hardcore, regular, protester
@@ -182,6 +185,7 @@ public:
 		return m_sonar;
 	}
 
+	void setHealth(int damage);
 	void setGunFlag(bool flag)
 	{
 		m_gunFlag = flag;
@@ -209,15 +213,17 @@ public:
 		Actor(sw, imagID, 60, 60, left, 1.0, 0),
 		m_goldCount(0),
 		m_health(5),
-		m_leave_state(false), 
-		m_wait_state(false),
 		m_tick_count(1),
 		m_current_dir(left),
-		m_squares_walked(1)
+		m_squares_walked(1),
+		m_leave_state(false), 
+		m_wait_state(false),
+		m_stunned(false)
 	{
 		setVisible(true);
 		initWaitTicks();
-		setWalkDistance();
+		initWalkDistance();
+		initStunDuration();
 	}
 	virtual void doSomething();
 
@@ -244,7 +250,7 @@ public:
 	}
 	auto getMaxSquares()->int
 	{
-		return m_num_squares;
+		return m_max_squares;
 	}
 	auto getTickCount()->int
 	{
@@ -262,11 +268,15 @@ public:
 	{
 		return m_wait_state;
 	}
-	
+	auto getWaitDuration()->int
+	{
+		return m_wait_duration;
+	}
 	auto getLeaveState()->int
 	{
 		return m_leave_state;
 	}
+
 	auto setLeaveState(bool flag)->void
 	{
 		m_leave_state = flag;
@@ -279,28 +289,29 @@ public:
 	{
 		m_wait_state = flag;
 	}
-	auto setWalkDistance()->void;
-	auto getWaitTicks()->int
-	{
-		return m_wait_ticks;
-	}
+	auto setWaitDuration(int dur)->void;
+	auto initWalkDistance()->void;
+	auto initWaitTicks()->void;
+	auto initStunDuration()->void;
 	auto type(ActorType)->bool;
 	auto wait()->void;
-	auto initWaitTicks()->void;
 	auto leave()->void;
 	Direction findNewDirection();
-protected:
-	void protesterAction(Direction dir);
 private:
+	void protesterAction(Direction dir);
+
 	int m_goldCount;
 	int m_health;
+	int m_tick_count;
+	int m_max_squares;
+	int m_squares_walked;
+	int m_wait_duration;
+	int m_stun_duration;
+	Direction m_current_dir;
+
 	bool m_leave_state;
 	bool m_wait_state;
-	int m_num_squares;
-	int m_squares_walked;
-	int m_wait_ticks;
-	int m_tick_count;
-	Direction m_current_dir;
+	bool m_stunned;
 };
 
 
@@ -314,7 +325,6 @@ public:
 	//virtual void doSomething();
 };
 
-
 class HardcoreProtester : public Protester
 {
 public:
@@ -324,7 +334,6 @@ public:
 	}
 	//virtual void doSomething();
 };
-
 
 //***********************GOODIES***************************
 class Goodie : public Actor
@@ -380,18 +389,16 @@ public:
 	virtual void doSomething();
 };
 
-
 class Oil : public Goodie
 {
 public:
 	Oil(StudentWorld* sw, int startX, int startY) :
 		Goodie(sw, IMID_BARREL, startX, startY)
 	{
-		setVisible(true); 
+		setVisible(false); 
 	}
 	virtual void doSomething();
 };
-
 
 class Water : public Goodie
 {
@@ -404,21 +411,21 @@ public:
 	virtual void doSomething();
 };
 
-
 class Sonar : public Goodie
 {
 public:
 	Sonar(StudentWorld* sw, int startX, int startY) :
-		Goodie(sw, IMID_SONAR, startX, startY)
+		Goodie(sw, IMID_SONAR, startX, startY),
+		m_ticks(0)
 	{
-	setVisible(true);
+		setVisible(true);
+		initLifeTicks();
 	}
 	virtual void doSomething();
 	auto initLifeTicks()->void;
 private:
 	int m_life_ticks;
 	int m_ticks;
-
 };
 
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp

@@ -1,7 +1,5 @@
 #include "Actor.h"
 #include "StudentWorld.h"
-#include <algorithm>
-enum Direction;
 // Students:  Add code to this file (if you wish), Actor.h, StudentWorld.h, and StudentWorld.cpp
 double Actor::distanceFromActor(std::shared_ptr<Actor> a)
 {
@@ -11,8 +9,6 @@ bool Actor::isDirt()
 {
 	bool flag = false;
 	int i = 0;
-	//high_resolution_clock::time_point t1 = high_resolution_clock::now();
-	
 	/*for (auto & y : *(getWorld()->getDirt()))
 	{
 		if (y[i]->getY() - getY() >= 4)
@@ -54,11 +50,6 @@ bool Actor::isDirt()
 			}
 		}
 	}
-	//high_resolution_clock::time_point t2 = high_resolution_clock::now();
-
-	//auto duration = duration_cast<nanoseconds>(t2 - t1).count();
-
-	//std::cout << duration;
 	return flag;
 }
 bool Actor::isTypeActorInFront(Direction dir, ActorType type)
@@ -405,6 +396,12 @@ void DiggerMan::dropGold()
 		break;
 	}
 }
+void DiggerMan::setHealth(int damage)
+{
+	m_health -= damage;
+	if (m_health <= 0)
+		setDead(true);
+}
 void DiggerMan::diggerAction()			
 {
 	int key;
@@ -498,7 +495,7 @@ void Protester::doSomething()
 		return;
 	else if (!getWaitState())
 	{
-		if (getTickCount() % (getWaitTicks() + 1) == 0)
+		if (getTickCount() % (getWaitDuration() + 1) == 0)
 		{
 			incTickCount();
 			setWaitState(true);
@@ -521,10 +518,13 @@ void Protester::doSomething()
 			protesterAction(getDirection());
 		incTickCount();
 	}
-	else
+	else if (getLeaveState())
 	{
 
-		if (getTickCount() % getWaitTicks() == 0)
+	}
+	else
+	{
+		if (getTickCount() % getWaitDuration() == 0)
 			setWaitState(false);
 		incTickCount();
 	}
@@ -639,7 +639,7 @@ void Protester::protesterAction(Direction dir)
 	if (isTypeActorInFront(getDirection(), digger))
 	{
 		getWorld()->playSound(SOUND_PROTESTER_YELL);
-		getWorld()->playSound(SOUND_PLAYER_ANNOYED);
+		getDigger()->setHealth(20);
 		return;
 	}
 }
@@ -663,17 +663,26 @@ auto Protester::wait()->void
 {
 
 }
+auto Protester::initWalkDistance()->void
+{
+	m_max_squares = rand() % 53 + 8;
+}
 auto Protester::initWaitTicks()->void
 {
-	m_wait_ticks = std::max(0, 3 - static_cast<int>(getWorld()->getLevel()) / 4);
+	m_wait_duration = std::max(0, 3 - static_cast<int>(getWorld()->getLevel()) / 4);
 }
-auto Protester::setWalkDistance()->void
+auto Protester::initStunDuration()->void
 {
-	m_num_squares = rand() % 53 + 8;
+	m_stun_duration = std::max(50, 100 - static_cast<int>(getWorld()->getLevel()) * 10);
+}
+auto Protester::setWaitDuration(int dur)->void
+{
+	m_wait_duration = dur;
 }
 auto Protester::leave()->void
 {
-
+	setLeaveState(true);
+	getWorld()->getShortestPathOut(getX(), getY());
 }
 
 
@@ -760,14 +769,25 @@ void Water::doSomething()
 
 void Sonar::doSomething() 
 {
-	if (distanceFromActor(getDigger()) > 4 && distanceFromActor(getDigger()) < 7)
-		setVisible(true);
-	else if (distanceFromActor(getDigger()) <= 3)
-		getPickedUp();
-	if (isPickedUp())
+	if (isDead())
+		return;
+	else
 	{
-		getWorld()->getDiggerMan()->incSonar();
-		getWorld()->playSound(SOUND_GOT_GOODIE);
+		if (distanceFromActor(getDigger()) > 4 && distanceFromActor(getDigger()) < 7)
+			setVisible(true);
+		else if (distanceFromActor(getDigger()) <= 3)
+			getPickedUp();
+		if (isPickedUp())
+		{
+			getWorld()->getDiggerMan()->incSonar();
+			getWorld()->playSound(SOUND_GOT_GOODIE);
+		}
+		m_ticks++;
+		if (m_ticks == m_life_ticks)
+		{
+			setDead(true);
+			setVisible(false);
+		}
 	}
 }
 auto Sonar::initLifeTicks()->void
