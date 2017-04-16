@@ -20,6 +20,7 @@ int StudentWorld::init()
 	initProbHard();
 	m_diggerMan = std::make_shared<DiggerMan>(this);
 	fillDirt();
+	initEmptySquares();
 	for (int i = 0; i < 3; i++)
 	{	// Fills StudentWorld with Goodies
 		switch (i)
@@ -75,10 +76,11 @@ int StudentWorld::move()
 		{
 			if ((rand() % 5 + 1) < 4)
 			{
-				m_actors.emplace_back(make_shared<Water>(this, 4, 60));
+				int spawn = rand() % m_emptySquares.size();
+				addActor(make_shared<Water>(this, m_emptySquares[spawn].x, m_emptySquares[spawn].y));
 			}
 			else
-				m_actors.emplace_back(make_shared<Sonar>(this, 0, 60));
+				addActor(make_shared<Sonar>(this, 0, 60));
 		}
 		m_diggerMan->doSomething();
 		for (auto & a : m_actors)
@@ -119,6 +121,7 @@ void StudentWorld::cleanUp()
 		a.clear();
 	}
 	m_dirt.clear();
+	m_emptySquares.clear();
 }
 
 std::string StudentWorld::formatGameStats() const
@@ -241,6 +244,23 @@ void StudentWorld::getShortestPathOut(int x, int y)
 {
 
 }
+bool StudentWorld::containsSquare(int xCoord, int yCoord)
+{
+	for (auto s : m_emptySquares)
+	{
+		if (s.x == xCoord && s.y == yCoord)
+			return true;
+	}
+	return false;
+}
+void StudentWorld::initEmptySquares()
+{
+	for (int i = 4; i <= 56; i++)
+	{
+		m_emptySquares.emplace_back(30, i);
+	}
+}
+
 void StudentWorld::initProtTicks()
 {
 	m_protTicks = max(25, (200 - static_cast<int>(getLevel())));

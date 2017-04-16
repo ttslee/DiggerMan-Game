@@ -4,7 +4,14 @@
 #include "Actor.h"
 #include <ctime>
 // Students:  Add code to this file, StudentWorld.cpp, Actor.h, and Actor.cpp
-
+struct EmptySquare
+{
+	EmptySquare(int xCoord, int yCoord) : x(xCoord), y(yCoord)
+	{
+	}
+	int x;
+	int y;
+};
 class StudentWorld : public GameWorld
 {
 public:
@@ -20,19 +27,24 @@ public:
 	std::string formatGameStats() const;
 	void addActor(std::shared_ptr<Actor> obj);
 
-	std::shared_ptr<DiggerMan>				getDiggerMan()
+	bool containsSquare(int, int);
+	std::vector<EmptySquare>						*getEmptySquares()
+	{
+		return &m_emptySquares;
+	}
+	std::shared_ptr<DiggerMan>						getDiggerMan()
 	{
 		return m_diggerMan;
 	}
-	std::vector<std::shared_ptr<Protester>>	getProtesters()
+	std::vector<std::shared_ptr<Protester>>			getProtesters()
 	{
 		return m_protesters;
 	}
-	std::vector<std::shared_ptr<Actor>>		getActors()
+	std::vector<std::shared_ptr<Actor>>				getActors()
 	{
 		return m_actors;
 	}
-	std::vector<std::vector<std::unique_ptr<Dirt>>>* getDirt()
+	std::vector<std::vector<std::unique_ptr<Dirt>>> *getDirt()
 	{
 		return &m_dirt;
 	}
@@ -67,6 +79,7 @@ public:
 		m_oilCount--;
 	}
 	void setMaxProt();
+	void initEmptySquares();
 	void initNumBould();
 	void initNumGold();
 	void initNumOil();
@@ -82,6 +95,7 @@ private:
 	void initMaxProt();
 	void initProbHard();
 
+	std::vector<EmptySquare>						m_emptySquares;
 	std::vector<std::shared_ptr<Actor>>				m_actors;
 	std::vector<std::shared_ptr<Protester>>			m_protesters;
 	std::shared_ptr<DiggerMan>						m_diggerMan;

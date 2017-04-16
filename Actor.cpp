@@ -4,7 +4,7 @@ double Actor::distanceFromActor(std::shared_ptr<Actor> a)
 {
 	return sqrt(pow(getX() - a->getX(), 2) + pow(getY() - a->getY(), 2));
 }
-bool Actor::isDirt()
+bool Actor::clearDirt()
 {
 	bool flag = false;
 	int i = 0;
@@ -113,7 +113,7 @@ void Squirt::doSomething()
 {
 	if (isDead())
 		return;
-	if (isDirt())
+	if (clearDirt())
 	{
 		setVisible(false);
 		setDead(true);
@@ -204,8 +204,6 @@ bool Boulder::isDirtBelow()
 		if (count == 4)
 			setBelowFlag(false);
 		else if (count > 0)
-			isDirt();
-		else
 			setBelowFlag(true);
 	}
 	return m_belowFlag;
@@ -247,7 +245,7 @@ void DiggerMan::doSomething()
 	diggerAction();
 	if (!isDead())
 	{
-		if (isDirt())
+		if (clearDirt())
 		{
 			if (m_digFlag)
 				getWorld()->playSound(SOUND_DIG);
@@ -297,6 +295,8 @@ void DiggerMan::diggerAction()
 			{
 				if (getY() < 60)
 					moveTo(getX(), getY() + 1);
+				if (!getWorld()->containsSquare(getX(), getY()))
+					getWorld()->getEmptySquares()->emplace_back(getX(), getY());
 			}
 			break;
 		case KEY_PRESS_DOWN:
@@ -304,9 +304,10 @@ void DiggerMan::diggerAction()
 				setDirection(down);
 			if (!isBoulder(down))
 			{
-				if (getY() > 0){
+				if (getY() > 0)
 					moveTo(getX(), getY() - 1);
-				}
+				if (!getWorld()->containsSquare(getX(), getY()))
+					getWorld()->getEmptySquares()->emplace_back(getX(), getY());
 			}
 			break;
 		case KEY_PRESS_LEFT:
@@ -316,6 +317,8 @@ void DiggerMan::diggerAction()
 			{
 				if (getX() > 0)
 					moveTo(getX() - 1, getY());
+				if (!getWorld()->containsSquare(getX(), getY()))
+					getWorld()->getEmptySquares()->emplace_back(getX(), getY());
 			}
 			break;
 		case KEY_PRESS_RIGHT:
@@ -325,6 +328,8 @@ void DiggerMan::diggerAction()
 			{
 				if (getX() < 60)
 					moveTo(getX() + 1, getY());
+				if (!getWorld()->containsSquare(getX(), getY()))
+					getWorld()->getEmptySquares()->emplace_back(getX(), getY());
 			}
 			break;
 		case KEY_PRESS_TAB:
@@ -350,10 +355,6 @@ void DiggerMan::diggerAction()
 			break;
 		}
 	}
-}
-void DiggerMan::initSonarDuration()
-{
-
 }
 void DiggerMan::shoot()
 {
@@ -388,6 +389,10 @@ void Protester::doSomething()
 {
 	if (isDead())
 		return;
+	if (getLeaveState())
+	{
+
+	}
 	else if (!getWaitState())
 	{
 		if (getTickCount() % (getWaitDuration() + 1) == 0)
@@ -412,10 +417,6 @@ void Protester::doSomething()
 		else
 			protesterAction(getDirection());
 		incTickCount();
-	}
-	else if (getLeaveState())
-	{
-
 	}
 	else
 	{
@@ -554,13 +555,9 @@ auto Protester::type(ActorType ty)->bool
 	}
 	return false;
 }
-auto Protester::wait()->void
-{
-
-}
 auto Protester::initWalkDistance()->void
 {
-	m_max_squares = rand() % 53 + 8;
+	m_max_squares = rand() % 61;
 }
 auto Protester::initWaitTicks()->void
 {
@@ -635,7 +632,6 @@ void Nugget::doSomething()
 				getPickedUp();
 				getWorld()->playSound(SOUND_PROTESTER_FOUND_GOLD);
 				p->incGold();
-				p->wait();
 				if (p->type(regular))
 				{
 					if (p->getGold() > 3)
@@ -670,7 +666,13 @@ void Oil::doSomething()
 		}
 	}
 }
-void Water::doSomething()
+
+
+auto TemporaryGoodie::initLifeTicks()->void
+{
+	m_life_ticks = std::max(100, (300 - 10 * static_cast<int>(getWorld()->getLevel())));
+}
+void TemporaryGoodie::doSomething()
 {
 	if (isDead())
 		return;
@@ -678,35 +680,21 @@ void Water::doSomething()
 		getPickedUp();
 	if (isPickedUp())
 	{
-		getDigger()->incWater();
-		getWorld()->playSound(SOUND_GOT_GOODIE);
-	}
-}
-
-void Sonar::doSomething()
-{
-	if (isDead())
-		return;
-	else if (!isPickedUp())
-	{
-		if (distanceFromActor(getDigger()) <= 3)
+		switch (getImgID())
 		{
-			getPickedUp();
+		case IMID_WATER_POOL:
+			getDigger()->incWater();
+			break;
+		case IMID_SONAR:
 			getDigger()->incSonar();
+			break;
 		}
-		if (isPickedUp())
-		{
-			getWorld()->playSound(SOUND_GOT_GOODIE);
-		}
+		getWorld()->playSound(getSoundID());
 	}
-	m_ticks++;
-	if (m_ticks == m_life_ticks)
+	incTicks();
+	if (getTicks() == getLifeTicks())
 	{
 		setDead(true);
 		setVisible(false);
 	}
-}
-auto Sonar::initLifeTicks()->void
-{
-	m_life_ticks = std::max(100, (300 - 10 * static_cast<int>(getWorld()->getLevel())));
 }

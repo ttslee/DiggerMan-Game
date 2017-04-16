@@ -25,7 +25,7 @@ public:
 	{
 	}
 	virtual void doSomething() = 0;
-	virtual bool isDirt();
+	virtual bool clearDirt();
 	void setDead(bool state)
 	{
 		m_isDead = state;
@@ -65,7 +65,7 @@ public:
 		m_soundCheck(false)
 	{
 		setVisible(true);
-		isDirt();
+		clearDirt();
 		std::cout << "Boulder Created" << std::endl;
 	}
 	virtual void doSomething();
@@ -193,10 +193,6 @@ public:
 	{
 		return m_sonarFlag;
 	}
-	const int getSonarDuration()
-	{
-		return m_sonarDuration;
-	}
 	void setSonarFlag(bool flag)
 	{
 		m_sonarFlag = flag;
@@ -208,7 +204,6 @@ public:
 	}
 	bool isBoulder(Direction dir);
 	void dropGold();
-	void initSonarDuration();
 protected:
 	void diggerAction();
 	void shoot();
@@ -309,12 +304,13 @@ public:
 	{
 		m_wait_state = flag;
 	}
-	auto setWaitDuration(int dur)->void;
+	auto setWaitDuration(int)->void;
+
 	auto initWalkDistance()->void;
 	auto initWaitTicks()->void;
 	auto initStunDuration()->void;
 	auto type(ActorType)->bool;
-	auto wait()->void;
+	auto stunned()->void;
 	auto leave()->void;
 	Direction findNewDirection();
 private:
@@ -420,37 +416,62 @@ public:
 	virtual void doSomething();
 };
 
-class Water : public Goodie
+class TemporaryGoodie : public Goodie
 {
 public:
-	Water(StudentWorld* sw, int startX, int startY) :
-		Goodie(sw, IMID_WATER_POOL, startX, startY),
-		m_ticks(0)
-	{
-		setVisible(true);
-	}
-	virtual void doSomething();
-	auto initLifeTicks()->void;
-private:
-	int m_life_ticks;
-	int m_ticks;
-};
-
-class Sonar : public Goodie
-{
-public:
-	Sonar(StudentWorld* sw, int startX, int startY) :
-		Goodie(sw, IMID_SONAR, startX, startY),
-		m_ticks(0)
+	TemporaryGoodie(StudentWorld* sw, int imID, int startX, int startY, int sndID) :
+		Goodie(sw, imID, startX, startY),
+		m_ticks(0),
+		soundID(sndID),
+		imgID(imID)
 	{
 		setVisible(true);
 		initLifeTicks();
 	}
 	virtual void doSomething();
 	auto initLifeTicks()->void;
+	auto incTicks()->void
+	{
+		m_ticks++;
+	}
+	auto getTicks()->int
+	{
+		return m_ticks;
+	}
+	auto getSoundID()->int
+	{
+		return soundID;
+	}
+	auto getImgID()->int
+	{
+		return imgID;
+	}
+	auto getLifeTicks()->int
+	{
+		return m_life_ticks;
+	}
 private:
+	int soundID;
+	int imgID;
 	int m_life_ticks;
 	int m_ticks;
+};
+class Water : public TemporaryGoodie
+{
+public:
+	Water(StudentWorld* sw, int startX, int startY) :
+		TemporaryGoodie(sw, IMID_WATER_POOL, startX, startY, SOUND_GOT_GOODIE)
+	{
+	}
+};
+
+class Sonar : public TemporaryGoodie
+{
+public:
+	Sonar(StudentWorld* sw, int startX, int startY) :
+		TemporaryGoodie(sw, IMID_SONAR, startX, startY, SOUND_SONAR)
+	{
+	}
 };
 
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
