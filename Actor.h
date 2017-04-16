@@ -26,6 +26,7 @@ public:
 	}
 	virtual void doSomething() = 0;
 	virtual bool clearDirt();
+	virtual bool isDirt();
 	void setDead(bool state)
 	{
 		m_isDead = state;

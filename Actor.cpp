@@ -28,6 +28,29 @@ bool Actor::clearDirt()
 	}
 	return flag;
 }
+bool Actor::isDirt()
+{
+
+	bool flag = false;
+	int i = 0;
+	if (getY() < 60)
+	{
+		std::vector<std::vector<std::unique_ptr<Dirt>>>* dirt = getWorld()->getDirt();
+		for (int i = getY(); i < getY() + SPRITE_HEIGHT; i++)
+		{
+			if (i >= 60)
+				break;
+			for (int j = getX(); j < getX() + SPRITE_WIDTH; j++)
+			{
+				if (!(*dirt)[i][j]->isDead())
+				{
+					flag = true;
+				}
+			}
+		}
+	}
+	return flag;
+}
 bool Actor::isTypeActorInFront(Direction dir, ActorType type)
 {
 	switch (type)
