@@ -62,16 +62,16 @@ int StudentWorld::move()
 			playSound(SOUND_FINISHED_LEVEL);
 			return GWSTATUS_FINISHED_LEVEL;
 		}
-		/*else if (m_ticks % m_protTicks == 0 && m_protesterCount < m_maxProt)
+		if (m_ticks % m_protTicks == 0 && m_protesterCount < m_maxProt)
 		{
-		int regOrhard = rand() % 100;
-		if (regOrhard < m_probHard)
-		m_protesters.emplace_back(make_shared<HardcoreProtester>(this));
-		else
-		m_protesters.emplace_back(make_shared<RegularProtester>(this));
-		m_protesterCount++;
-		}*/
-		else if (rand() % m_probGoodie == 1)
+			int regOrhard = rand() % 100;
+			if (regOrhard < m_probHard)
+				m_protesters.emplace_back(make_shared<HardcoreProtester>(this));
+			else
+				m_protesters.emplace_back(make_shared<RegularProtester>(this));
+			m_protesterCount++;
+		}
+		if (rand() % m_probGoodie == 1)
 		{
 			if ((rand() % 5 + 1) < 4)
 			{

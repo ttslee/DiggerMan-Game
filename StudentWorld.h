@@ -24,30 +24,30 @@ public:
 	{
 		return m_diggerMan;
 	}
-	std::vector<std::shared_ptr<Protester>>	getProtesters()	
-	{ 
-		return m_protesters; 
-	}
-	std::vector<std::shared_ptr<Actor>>		getActors()		
+	std::vector<std::shared_ptr<Protester>>	getProtesters()
 	{
-		return m_actors; 
+		return m_protesters;
 	}
-	std::vector<std::vector<std::unique_ptr<Dirt>>>* getDirt()		
-	{ 
-		return &m_dirt; 
+	std::vector<std::shared_ptr<Actor>>		getActors()
+	{
+		return m_actors;
+	}
+	std::vector<std::vector<std::unique_ptr<Dirt>>>* getDirt()
+	{
+		return &m_dirt;
 	}
 
-	const int getDiggerHealth() const										
+	const int getDiggerHealth() const
 	{
-		return m_diggerMan->getHealth(); 
+		return m_diggerMan->getHealth();
 	}
-	const int getNumSquirtsLeft() const									
+	const int getNumSquirtsLeft() const
 	{
-		return m_diggerMan->getNumSquirts(); 
+		return m_diggerMan->getNumSquirts();
 	}
-	const int getTicks() const											
+	const int getTicks() const
 	{
-		return m_ticks; 
+		return m_ticks;
 	}
 	const int getBoulder() const
 	{
@@ -62,8 +62,8 @@ public:
 		return m_oilCount;
 	}
 	void getShortestPathOut(int x, int y);
-	void decOil()													
-	{ 
+	void decOil()
+	{
 		m_oilCount--;
 	}
 	void setMaxProt();
@@ -80,13 +80,13 @@ private:
 	void initProtTicks();
 	void incTicks();
 	void initMaxProt();
-	void initProbHard();	
-	
+	void initProbHard();
+
 	std::vector<std::shared_ptr<Actor>>				m_actors;
 	std::vector<std::shared_ptr<Protester>>			m_protesters;
 	std::shared_ptr<DiggerMan>						m_diggerMan;
 	std::vector<std::vector<std::unique_ptr<Dirt>>>	m_dirt;
-	
+
 	int m_oilCount;
 	int m_boulderCount;
 	int m_goldCount;

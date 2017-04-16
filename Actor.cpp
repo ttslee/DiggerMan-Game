@@ -8,29 +8,6 @@ bool Actor::isDirt()
 {
 	bool flag = false;
 	int i = 0;
-	/*for (auto & y : *(getWorld()->getDirt()))
-	{
-	if (y[i]->getY() - getY() >= 4)
-	break;
-	if (y[i]->getY() < getY())
-	{
-	i++;
-	continue;
-	}
-	for (auto & x : y)
-	{
-	if (x->isDead())
-	continue;
-	if ((x->getX() - getX()) >= 0 && (x->getX() - getX()) <= 3 && (x->getY() - getY()) >= 0 && (x->getY() - getY()) <= 3)
-	{
-	x->setVisible(false);
-	x->setDead(true);
-	flag = true;
-	}
-	}
-	i++;
-	}*/
-
 	if (getY() < 60)
 	{
 		std::vector<std::vector<std::unique_ptr<Dirt>>>* dirt = getWorld()->getDirt();
@@ -109,46 +86,6 @@ bool Actor::isTypeActorInFront(Direction dir, ActorType type)
 				return true;
 			}
 		}
-		/*for (auto & p : getWorld()->getProtesters())
-		{
-		switch (dir)
-		{
-		case up:
-		if (isAbove(static_cast<std::shared_ptr<Actor>>(p)) && (p->getX() - getX() <= SPRITE_HEIGHT))
-		{
-		p->decHealth();
-		getWorld()->playSound(SOUND_PROTESTER_ANNOYED);
-		return true;
-		}
-		break;
-		case down:
-		if (isBelow(static_cast<std::shared_ptr<Actor>>(p)) && (p->getX() - getX() <= SPRITE_HEIGHT))
-		{
-		p->decHealth();
-		getWorld()->playSound(SOUND_PROTESTER_ANNOYED);
-		return true;
-		}
-		break;
-		case left:
-		if (isLeft(static_cast<std::shared_ptr<Actor>>(p)) && (p->getX() - getX() <= SPRITE_WIDTH))
-		{
-		p->decHealth();
-		getWorld()->playSound(SOUND_PROTESTER_ANNOYED);
-		return true;
-		}
-		break;
-		case right:
-		if (isRight(static_cast<std::shared_ptr<Actor>>(p)) && (p->getX() - getX() <= SPRITE_WIDTH))
-		{
-		p->decHealth();
-		getWorld()->playSound(SOUND_PROTESTER_ANNOYED);
-		return true;
-		}
-		break;
-		default:
-		return false;
-		}
-		}*/
 	}
 	return false;
 }
@@ -243,34 +180,6 @@ bool Boulder::isDirtBelow()
 {
 	if (m_belowFlag)
 	{
-		/*int i = 0;
-		int count = 0;
-		for (auto & y : getWorld()->getDirt())
-		{
-		if (getY() - y[i]->getY() > 1 || getY() - y[i]->getY() < 1)
-		{
-		i++;
-		continue;
-		}
-		for (auto & x : y)
-		{
-
-		if (getY() - x->getY() != 1)
-		continue;
-		if (x->isDead() && (x->getX() - getX() >= 0) && (x->getX() - getX() <= 3))
-		{
-		count++;
-		if (count == 4)
-		{
-		setBelowFlag(false);
-		break;
-		}
-		}
-		}
-		if (!m_belowFlag)
-		break;
-		i++;
-		}*/
 		auto count = 0;
 		std::vector<std::vector<std::unique_ptr<Dirt>>>* dirt = getWorld()->getDirt();
 		for (int x = getX(); x < getX() + SPRITE_WIDTH; x++)
@@ -285,33 +194,6 @@ bool Boulder::isDirtBelow()
 	}
 	if (m_Falling)
 	{
-		/*int i = 0;
-		int count = 0;
-		for (auto & y : getWorld()->getDirt())
-		{
-		if (getY() - y[i]->getY() > 1)
-		{
-		i++;
-		continue;
-		}
-		for (auto & x : y)
-		{
-		if (getY() - x->getY() != 1)
-		continue;
-		if (!x->isDead() && (x->getX() - getX() >= 0) && (x->getX() - getX() <= 3))
-		{
-		count++;
-		if (count == 4)
-		{
-		setBelowFlag(true);
-		break;
-		}
-		}
-		}
-		if (m_belowFlag)
-		break;
-		i++;
-		}*/
 		auto count = 0;
 		std::vector<std::vector<std::unique_ptr<Dirt>>>* dirt = getWorld()->getDirt();
 		for (int x = getX(); x < getX() + SPRITE_WIDTH; x++)
