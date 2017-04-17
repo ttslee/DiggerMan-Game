@@ -11,7 +11,7 @@
 #include <cassert>
 using namespace std::chrono;
 enum ActorType {
-	digger, boulder, water, gold, oil, sonar, squirt, hardcore, regular, protester
+	digger, boulder, water, gold, oil, sonar, squirt, hardcore, regular, protester, dirt
 };
 class StudentWorld;
 class DiggerMan;
@@ -42,10 +42,15 @@ public:
 	std::shared_ptr<DiggerMan> getDigger();
 	double distanceFromActor(std::shared_ptr<Actor>);
 	bool isTypeActorInFront(Direction dir, ActorType type);
-	auto isAbove(std::shared_ptr<Actor>&)->bool;
-	auto isBelow(std::shared_ptr<Actor>&)->bool;
-	auto isLeft(std::shared_ptr<Actor>&)->bool;
-	auto isRight(std::shared_ptr<Actor>&)->bool;
+
+	template<typename T>
+	auto isAbove(T &)->bool;
+	template<typename T>
+	auto isBelow(T &)->bool;
+	template<typename T>
+	auto isLeft(T &)->bool;
+	template<typename T>
+	auto isRight(T &)->bool;
 
 private:
 	bool m_isDead;
@@ -314,6 +319,7 @@ public:
 	auto stunned()->void;
 	auto leave()->void;
 	Direction findNewDirection();
+	auto checkIfClear(Direction)->bool;
 private:
 	void protesterAction(Direction dir);
 

@@ -59,7 +59,7 @@ bool Actor::isTypeActorInFront(Direction dir, ActorType type)
 		for (auto & a : getWorld()->getActors())
 		{
 			if (!dynamic_cast<Boulder*>(a.get()))
-				break;
+				continue;
 			if (!a->isDead() && (a->getY() - getY() <= 4 && a->getY() - getY() >= -4) && (a->getX() - getX() <= 4 && a->getX() - getX() >= -4))
 			{
 				switch (dir)
@@ -84,16 +84,16 @@ bool Actor::isTypeActorInFront(Direction dir, ActorType type)
 		switch (dir)
 		{
 		case up:
-			return isAbove(static_cast<std::shared_ptr<Actor>>(getDigger()));
+			return isAbove(getDigger());
 			break;
 		case down:
-			return isBelow(static_cast<std::shared_ptr<Actor>>(getDigger()));
+			return isBelow(getDigger());
 			break;
 		case left:
-			return isLeft(static_cast<std::shared_ptr<Actor>>(getDigger()));
+			return isLeft(getDigger());
 			break;
 		case right:
-			return isRight(static_cast<std::shared_ptr<Actor>>(getDigger()));
+			return isRight(getDigger());
 			break;
 		default:
 			return false;
@@ -109,22 +109,70 @@ bool Actor::isTypeActorInFront(Direction dir, ActorType type)
 				return true;
 			}
 		}
+	case dirt:
+		switch (dir)
+		{
+		case up:
+			if (getY() < 56)
+			{
+				for (int i = 0; i < 4; i++)
+				{
+					if (!(*getWorld()->getDirt())[getY() + 4][getX() + i]->isDead())
+						return false;
+				}
+			}
+			break;
+		case down:
+			if (getY() > 0)
+			{
+				for (int i = 0; i < 4; i++)
+				{
+					if (!(*getWorld()->getDirt())[getY() - 1][getX() + i]->isDead())
+						return false;
+				}
+			}
+			break;
+		case left:
+			if (getX() > 0 && getY() < 57)
+			{
+				for (int i = 0; i < 4; i++)
+				{
+					if (!(*getWorld()->getDirt())[getY() + i][getX() - 1]->isDead())
+						return false;
+				}
+			}
+			break;
+		case right:
+			if (getX() < 59)
+				for (int i = 0; i < 4; i++)
+				{
+				if (!(*getWorld()->getDirt())[getY() + i][getX() + 4]->isDead())
+					return false;
+				}
+			break;
+		}
+		return true;
+		break;
 	}
 	return false;
 }
-bool Actor::isAbove(std::shared_ptr<Actor> &a)
+template<typename T>
+bool Actor::isAbove(T& a)
 {
 	return (a->getY() - getY() == SPRITE_HEIGHT && ((getX() >= a->getX() && getX() - a->getX() < SPRITE_WIDTH) || (a->getX() >= getX() && a->getX() - getX() < SPRITE_WIDTH)));
 }
-bool Actor::isBelow(std::shared_ptr<Actor>&a)
+template<typename T>
+bool Actor::isBelow(T& a)
 {
 	return (getY() - a->getY() == SPRITE_HEIGHT && ((getX() >= a->getX() && getX() - a->getX() < SPRITE_WIDTH) || (a->getX() >= getX() && a->getX() - getX() < SPRITE_WIDTH)));
 }
-bool Actor::isLeft(std::shared_ptr<Actor>&a)
+template<typename T>
+bool Actor::isLeft(T& a)
 {
 	return (getX() - a->getX() == SPRITE_WIDTH && ((getY() >= a->getY() && getY() - a->getY() < SPRITE_HEIGHT) || (a->getY() >= getY() && a->getY() - getY() < SPRITE_HEIGHT)));
 }
-bool Actor::isRight(std::shared_ptr<Actor>&a)
+template<typename T>
+bool Actor::isRight(T& a)
 {
 	return (a->getX() - getX() == SPRITE_WIDTH && ((getY() >= a->getY() && getY() - a->getY() < SPRITE_HEIGHT) || (a->getY() >= getY() && a->getY() - getY() < SPRITE_HEIGHT)));
 }
@@ -132,6 +180,7 @@ std::shared_ptr<DiggerMan> Actor::getDigger()
 {
 	return m_student_world->getDiggerMan();
 }
+
 void Squirt::doSomething()
 {
 	if (isDead())
@@ -140,6 +189,7 @@ void Squirt::doSomething()
 	{
 		setVisible(false);
 		setDead(true);
+		getWorld()->getEmptySquares()->emplace_back(getX(), getY());
 		return;
 	}
 	if (m_distance <= 10)
@@ -247,7 +297,7 @@ void Boulder::fall()
 {
 	if (getY() > 0)
 		moveTo(getX(), getY() - 1);
-	if (isDirtBelow() || getX() == 0)
+	if (isDirt() || getX() == 0)
 	{
 		setDead(true);
 		setVisible(false);
@@ -416,7 +466,34 @@ void Protester::doSomething()
 	{
 
 	}
-	else if (!getWaitState())
+	if (getDigger()->getX() == getX())
+	{
+		if (getDigger()->getY() > getY())
+		{
+			if (checkIfClear(up))
+				setDirection(up);
+		}
+		else
+		{
+			if (checkIfClear(down))
+				setDirection(down);
+		}
+	}
+	else if (getDigger()->getY() == getY())
+	{
+		if (getDigger()->getX() < getX())
+		{
+			if (checkIfClear(left))
+				setDirection(left);
+		}
+		else
+		{
+			if (checkIfClear(right))
+				setDirection(right);
+		}
+	}
+
+	if (!getWaitState())
 	{
 		if (getTickCount() % (getWaitDuration() + 1) == 0)
 		{
@@ -435,7 +512,7 @@ void Protester::doSomething()
 		if (getSquaresWalked() % (getMaxSquares() + 1) == 0)
 		{
 			setSquaresWalked(1);
-			protesterAction(findNewDirection());
+			protesterAction(getDirection());
 		}
 		else
 			protesterAction(getDirection());
@@ -529,29 +606,49 @@ void Protester::protesterAction(Direction dir)
 	case up:
 		if (getY() < 60)
 		{
-			moveTo(getX() - 1, getY());
-			incSquaresWalked();
+			if (getDirection() != up)
+				setDirection(up);
+			if (!isTypeActorInFront(up, dirt) || !isTypeActorInFront(up, boulder))
+			{
+				moveTo(getX(), getY() + 1);
+				incSquaresWalked();
+			}
 		}
 		break;
 	case down:
 		if (getY() > 0)
 		{
-			moveTo(getX() - 1, getY());
-			incSquaresWalked();
+			if (getDirection() != down)
+				setDirection(down);
+			if (!isTypeActorInFront(down, dirt) || !isTypeActorInFront(down, boulder))
+			{
+				moveTo(getX(), getY() - 1);
+				incSquaresWalked();
+			}
 		}
 		break;
 	case left:
 		if (getX() > 0)
 		{
-			moveTo(getX() - 1, getY());
-			incSquaresWalked();
+			if (getDirection() != left)
+				setDirection(left);
+			if (!isTypeActorInFront(left, dirt) || !isTypeActorInFront(left, boulder))
+			{
+				moveTo(getX() - 1, getY());
+				incSquaresWalked();
+			}
 		}
 		break;
 	case right:
 		if (getX() < 60)
 		{
-			moveTo(getX() - 1, getY());
-			incSquaresWalked();
+			if (getDirection() != right)
+				setDirection(right);
+			if (!isTypeActorInFront(right, dirt) || !isTypeActorInFront(right, boulder))
+			{
+				moveTo(getX() + 1, getY());
+				incSquaresWalked();
+			}
 		}
 		break;
 	}
@@ -564,8 +661,85 @@ void Protester::protesterAction(Direction dir)
 }
 GraphObject::Direction Protester::findNewDirection()
 {
-
 	return m_current_dir;
+}
+auto Protester::checkIfClear(Direction dir)->bool
+{
+	int currentY = getY();
+	int currentX = getX();
+	bool flag = true;
+	switch (dir)
+	{
+	case up:
+		if (getY() < 56)
+		{
+			for (int u = getY(); u != getDigger()->getY(); u++)
+			{
+				moveTo(getX(), u);
+				if (isTypeActorInFront(up, dirt) || isTypeActorInFront(up, boulder))
+				{
+					flag = false;
+				}
+			}
+		}
+		break;
+	case down:
+		if (getY() > 0)
+		{
+			auto actors = getWorld()->getActors();
+			auto dirt = getWorld()->getDirt();
+			/*for (int i = getY(); i != getDigger()->getY(); i--)
+			{
+			moveTo(getX(), i);
+			if (isTypeActorInFront(down, dirt) || isTypeActorInFront(down, boulder))
+			{
+			flag = false;
+			}
+			}*/
+			for (int k = 0; k < getWorld()->getBoulder(); k++)
+			{
+				if (!actors[k]->isDead() && actors[k]->getX() == getX() && actors[k]->getY() > getDigger()->getY() && actors[k]->getY() < getY())
+					return false;
+			}
+			for (int d = getY() - 1; d > getDigger()->getY(); d--)
+			{
+				for (int j = 0; j < 4; j++)
+				{
+					if (!(*dirt)[d][getX() + j]->isDead())
+						flag = false;
+				}
+			}
+		}
+		break;
+	case left:
+		/*if (getX() > 0)
+		{
+		for (int i = getX(); i != getDigger()->getX(); i--)
+		{
+		moveTo(i, getY());
+		if (isTypeActorInFront(left, dirt) || isTypeActorInFront(left, boulder))
+		{
+		flag = false;
+		}
+		}
+		}*/
+		break;
+	case right:
+		if (getX() < 59)
+		{
+			for (int i = getX(); i != getDigger()->getX(); i++)
+			{
+				moveTo(i, getY());
+				if (isTypeActorInFront(right, dirt) || isTypeActorInFront(right, boulder))
+				{
+					flag = false;
+				}
+			}
+		}
+		break;
+	}
+	//moveTo(currentX, currentY);
+	return flag;
 }
 auto Protester::type(ActorType ty)->bool
 {
