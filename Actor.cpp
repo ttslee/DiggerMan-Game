@@ -133,7 +133,7 @@ bool Actor::isTypeActorInFront(Direction dir, ActorType type)
 			}
 			break;
 		case left:
-			if (getX() > 0 && getY() < 57)
+			if (getX() > 0 && getY() < 56)
 			{
 				for (int i = 0; i < 4; i++)
 				{
@@ -143,7 +143,7 @@ bool Actor::isTypeActorInFront(Direction dir, ActorType type)
 			}
 			break;
 		case right:
-			if (getX() < 59)
+			if (getX() < 59 && getY() < 56)
 				for (int i = 0; i < 4; i++)
 				{
 				if (!(*getWorld()->getDirt())[getY() + i][getX() + 4]->isDead())
@@ -165,6 +165,7 @@ template<typename T>
 bool Actor::isBelow(T& a)
 {
 	return (getY() - a->getY() == SPRITE_HEIGHT && ((getX() >= a->getX() && getX() - a->getX() < SPRITE_WIDTH) || (a->getX() >= getX() && a->getX() - getX() < SPRITE_WIDTH)));
+	/*(getY() - a->getY() == SPRITE_HEIGHT && ((getX() >= a->getX() && getX() - a->getX() < SPRITE_WIDTH) || (a->getX() >= getX() && a->getX() - getX() < SPRITE_WIDTH)));*/
 }
 template<typename T>
 bool Actor::isLeft(T& a)
@@ -232,7 +233,11 @@ void Boulder::doSomething()
 {
 	if (isDead())
 		return;
-	if (!isDirtBelow())
+	if (!isFalling() && !isDirtBelow())
+	{
+		setFalling(true);
+	}
+	if (isFalling())
 	{
 		if (delay())
 		{
@@ -242,12 +247,13 @@ void Boulder::doSomething()
 				getWorld()->playSound(SOUND_FALLING_ROCK);
 				m_soundCheck = true;
 			}
+			if (isFalling() && isBelow(getDigger()))
+			{
+				getDigger()->setDead(true);
+			}
 		}
 	}
-	if (isFalling() && isDiggerBelow())
-	{
-		getDigger()->setDead(true);
-	}
+
 }
 bool Boulder::isDirtBelow()
 {
@@ -263,7 +269,9 @@ bool Boulder::isDirtBelow()
 				count++;
 		}
 		if (count == 0)
+		{
 			setBelowFlag(false);
+		}
 	}
 	if (m_Falling)
 	{
@@ -271,12 +279,17 @@ bool Boulder::isDirtBelow()
 		std::vector<std::vector<std::unique_ptr<Dirt>>>* dirt = getWorld()->getDirt();
 		for (int x = getX(); x < getX() + SPRITE_WIDTH; x++)
 		{
+			if (getY() - 1 == 0)
+			{
+				setDead(true);
+				setVisible(false);
+				return true;
+			}
 			if ((*dirt)[getY() - 1][x]->isDead())
 				count++;
 		}
-		if (count == 4)
-			setBelowFlag(false);
-		else if (count > 0)
+		if (count == 4){}
+		else
 			setBelowFlag(true);
 	}
 	return m_belowFlag;
@@ -297,7 +310,7 @@ void Boulder::fall()
 {
 	if (getY() > 0)
 		moveTo(getX(), getY() - 1);
-	if (isDirt() || getX() == 0)
+	if (isDirtBelow() || getX() == 0)
 	{
 		setDead(true);
 		setVisible(false);
@@ -306,6 +319,7 @@ void Boulder::fall()
 bool Boulder::isDiggerBelow()
 {
 	return ((getX() - getDigger()->getX() <= 3 && getX() - getDigger()->getX() >= -3) && (getY() - getDigger()->getY() <= 4 && getY() - getDigger()->getY() >= 0));
+
 }
 
 //**************DIGGERMAN****************
@@ -667,18 +681,33 @@ auto Protester::checkIfClear(Direction dir)->bool
 {
 	int currentY = getY();
 	int currentX = getX();
+	auto actors = getWorld()->getActors();
+	auto dirt = getWorld()->getDirt();
 	bool flag = true;
 	switch (dir)
 	{
 	case up:
 		if (getY() < 56)
 		{
-			for (int u = getY(); u != getDigger()->getY(); u++)
+			/*for (int u = getY(); u != getDigger()->getY(); u++)
 			{
-				moveTo(getX(), u);
-				if (isTypeActorInFront(up, dirt) || isTypeActorInFront(up, boulder))
+			moveTo(getX(), u);
+			if (isTypeActorInFront(up, dirt) || isTypeActorInFront(up, boulder))
+			{
+			flag = false;
+			}
+			}*/
+			for (int k = 0; k < getWorld()->getBoulder(); k++)
+			{
+				if (!actors[k]->isDead() && actors[k]->getX() == getX() && actors[k]->getY() < getDigger()->getY() && actors[k]->getY() > getY())
+					return false;
+			}
+			for (int d = getY() + 4; d < getDigger()->getY(); d++)
+			{
+				for (int j = 0; j < 4; j++)
 				{
-					flag = false;
+					if (!(*dirt)[d][getX() + j]->isDead())
+						flag = false;
 				}
 			}
 		}
@@ -686,8 +715,6 @@ auto Protester::checkIfClear(Direction dir)->bool
 	case down:
 		if (getY() > 0)
 		{
-			auto actors = getWorld()->getActors();
-			auto dirt = getWorld()->getDirt();
 			/*for (int i = getY(); i != getDigger()->getY(); i--)
 			{
 			moveTo(getX(), i);
@@ -712,27 +739,55 @@ auto Protester::checkIfClear(Direction dir)->bool
 		}
 		break;
 	case left:
-		/*if (getX() > 0)
+		if (getX() > 0 && getY() < 56)
 		{
-		for (int i = getX(); i != getDigger()->getX(); i--)
-		{
-		moveTo(i, getY());
-		if (isTypeActorInFront(left, dirt) || isTypeActorInFront(left, boulder))
-		{
-		flag = false;
+			/*for (int i = getX(); i != getDigger()->getX(); i--)
+			{
+			moveTo(i, getY());
+			if (isTypeActorInFront(left, dirt) || isTypeActorInFront(left, boulder))
+			{
+			flag = false;
+			}
+			}*/
+			for (int k = 0; k < getWorld()->getBoulder(); k++)
+			{
+				if (!actors[k]->isDead() && actors[k]->getY() == getY() && actors[k]->getX() > getDigger()->getX() && actors[k]->getX() < getX())
+					return false;
+			}
+			for (int d = getX() - 1; d > getDigger()->getX(); d--)
+			{
+				for (int j = 0; j < 4; j++)
+				{
+					if (!(*dirt)[d][getX() + j]->isDead())
+						flag = false;
+				}
+			}
 		}
-		}
-		}*/
 		break;
 	case right:
-		if (getX() < 59)
+		if (getX() < 59 && getY() < 56)
 		{
-			for (int i = getX(); i != getDigger()->getX(); i++)
+			/*for (int i = getX(); i != getDigger()->getX(); i++)
 			{
-				moveTo(i, getY());
-				if (isTypeActorInFront(right, dirt) || isTypeActorInFront(right, boulder))
+			moveTo(i, getY());
+			if (isTypeActorInFront(right, dirt) || isTypeActorInFront(right, boulder))
+			{
+			flag = false;
+			}
+			}*/
+			for (int k = 0; k < getWorld()->getBoulder(); k++)
+			{
+				if (!actors[k]->isDead() && actors[k]->getY() == getY() && actors[k]->getX() < getDigger()->getX() && actors[k]->getX() > getX())
+					return false;
+			}
+			for (int d = getX() + 4; d < getDigger()->getX(); d++)
+			{
+				if (d > 57)
+					break;
+				for (int j = 0; j < 4; j++)
 				{
-					flag = false;
+					if (!(*dirt)[d][getX() + j]->isDead())
+						flag = false;
 				}
 			}
 		}
