@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 #include "StudentWorld.h" // Actor.h is included in StudentWorld.h
 
+=======
+#include "Actor.h"
+#include "StudentWorld.h"
+>>>>>>> origin/master
 double Actor::distanceFromActor(std::shared_ptr<Actor> a)
 {
 	return sqrt(pow(getX() - a->getX(), 2) + pow(getY() - a->getY(), 2));
@@ -110,7 +115,10 @@ bool Actor::isTypeActorInFront(Direction dir, ActorType type)
 				return true;
 			}
 		}
+<<<<<<< HEAD
 		break;
+=======
+>>>>>>> origin/master
 	case dirt:
 		switch (dir)
 		{
@@ -148,8 +156,13 @@ bool Actor::isTypeActorInFront(Direction dir, ActorType type)
 			if (getX() < 59 && getY() < 56)
 				for (int i = 0; i < 4; i++)
 				{
+<<<<<<< HEAD
 					if (!(*getWorld()->getDirt())[getY() + i][getX() + 4]->isDead())
 						return false;
+=======
+				if (!(*getWorld()->getDirt())[getY() + i][getX() + 4]->isDead())
+					return false;
+>>>>>>> origin/master
 				}
 			break;
 		}
@@ -478,6 +491,7 @@ void Protester::doSomething()
 {
 	if (isDead())
 		return;
+<<<<<<< HEAD
 	if (getHealth() == 0)
 	{
 		setDead(true);
@@ -494,6 +508,11 @@ void Protester::doSomething()
 	{
 		stunned();
 		return;
+=======
+	if (getLeaveState())
+	{
+
+>>>>>>> origin/master
 	}
 	if (getDigger()->getX() == getX())
 	{
@@ -522,7 +541,11 @@ void Protester::doSomething()
 		}
 	}
 
+<<<<<<< HEAD
 	if (!isWaiting())
+=======
+	if (!getWaitState())
+>>>>>>> origin/master
 	{
 		if (getTickCount() % (getWaitDuration() + 1) == 0)
 		{
@@ -799,6 +822,7 @@ void Nugget::doSomething()
 			{
 				setVisible(true);
 			}
+<<<<<<< HEAD
 		}
 		else if (!isPickedUp())
 		{
@@ -807,6 +831,16 @@ void Nugget::doSomething()
 				setVisible(true);
 			}
 		}
+=======
+		}
+		else if (!isPickedUp())
+		{
+			if (distanceFromActor(getDigger()) < 7)
+			{
+				setVisible(true);
+			}
+		}
+>>>>>>> origin/master
 		if (distanceFromActor(getDigger()) <= 3)
 			getPickedUp();
 		if (isPickedUp())
@@ -825,7 +859,10 @@ void Nugget::doSomething()
 				getPickedUp();
 				getWorld()->playSound(SOUND_PROTESTER_FOUND_GOLD);
 				p->incGold();
+<<<<<<< HEAD
 				p->setStunned(true);
+=======
+>>>>>>> origin/master
 				if (p->type(regular))
 				{
 					if (p->getGold() > 3)

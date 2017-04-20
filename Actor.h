@@ -146,7 +146,11 @@ public:
 		m_gunFlag(false),
 		m_sonarFlag(false),
 		m_health(100),
+<<<<<<< HEAD
 		m_numSquirts(100),
+=======
+		m_numSquirts(5),
+>>>>>>> origin/master
 		m_digFlag(true),
 		m_gold(0),
 		m_sonarCount(0)
@@ -285,7 +289,11 @@ public:
 	{
 		return m_health;
 	}
+<<<<<<< HEAD
 	auto isWaiting()->bool
+=======
+	auto getWaitState()->bool
+>>>>>>> origin/master
 	{
 		return m_wait_state;
 	}
@@ -297,10 +305,14 @@ public:
 	{
 		return m_leave_state;
 	}
+<<<<<<< HEAD
 	auto isStunned()->bool
 	{
 		return m_stunned;
 	}
+=======
+
+>>>>>>> origin/master
 	auto setLeaveState(bool flag)->void
 	{
 		m_leave_state = flag;
@@ -313,6 +325,7 @@ public:
 	{
 		m_wait_state = flag;
 	}
+<<<<<<< HEAD
 	auto setWaitDuration(int dur)->void
 	{
 		m_wait_duration = dur;
@@ -321,6 +334,9 @@ public:
 	{
 		m_stunned = flag;
 	}
+=======
+	auto setWaitDuration(int)->void;
+>>>>>>> origin/master
 
 	auto initWalkDistance()->void;
 	auto initWaitTicks()->void;
@@ -340,7 +356,10 @@ private:
 	int m_squares_walked;
 	int m_wait_duration;
 	int m_stun_duration;
+<<<<<<< HEAD
 	int m_stun_ticks;
+=======
+>>>>>>> origin/master
 	Direction m_current_dir;
 
 	bool m_leave_state;
