@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 #include "StudentWorld.h" // Actor.h is included in StudentWorld.h
 
-=======
-#include "Actor.h"
-#include "StudentWorld.h"
->>>>>>> origin/master
 double Actor::distanceFromActor(std::shared_ptr<Actor> a)
 {
 	return sqrt(pow(getX() - a->getX(), 2) + pow(getY() - a->getY(), 2));
@@ -115,10 +110,7 @@ bool Actor::isTypeActorInFront(Direction dir, ActorType type)
 				return true;
 			}
 		}
-<<<<<<< HEAD
 		break;
-=======
->>>>>>> origin/master
 	case dirt:
 		switch (dir)
 		{
@@ -128,7 +120,7 @@ bool Actor::isTypeActorInFront(Direction dir, ActorType type)
 				for (int i = 0; i < 4; i++)
 				{
 					if (!(*getWorld()->getDirt())[getY() + 4][getX() + i]->isDead())
-						return false;
+						return true;
 				}
 			}
 			break;
@@ -138,7 +130,7 @@ bool Actor::isTypeActorInFront(Direction dir, ActorType type)
 				for (int i = 0; i < 4; i++)
 				{
 					if (!(*getWorld()->getDirt())[getY() - 1][getX() + i]->isDead())
-						return false;
+						return true;
 				}
 			}
 			break;
@@ -148,7 +140,7 @@ bool Actor::isTypeActorInFront(Direction dir, ActorType type)
 				for (int i = 0; i < 4; i++)
 				{
 					if (!(*getWorld()->getDirt())[getY() + i][getX() - 1]->isDead())
-						return false;
+						return true;
 				}
 			}
 			break;
@@ -156,17 +148,12 @@ bool Actor::isTypeActorInFront(Direction dir, ActorType type)
 			if (getX() < 59 && getY() < 56)
 				for (int i = 0; i < 4; i++)
 				{
-<<<<<<< HEAD
 					if (!(*getWorld()->getDirt())[getY() + i][getX() + 4]->isDead())
-						return false;
-=======
-				if (!(*getWorld()->getDirt())[getY() + i][getX() + 4]->isDead())
-					return false;
->>>>>>> origin/master
+						return true;
 				}
 			break;
 		}
-		return true;
+		return false;
 		break;
 	}
 	return false;
@@ -201,7 +188,7 @@ void Squirt::doSomething()
 {
 	if (isDead())
 		return;
-	if (clearDirt())
+	if (isDirt())
 	{
 		setVisible(false);
 		setDead(true);
@@ -213,16 +200,20 @@ void Squirt::doSomething()
 		switch (getDirection())
 		{
 		case up:
-			moveTo(getX(), getY() + 1);
+			if (getY() == 60)
+				moveTo(getX(), getY() + 1);
 			break;
 		case down:
-			moveTo(getX(), getY() - 1);
+			if (getY() > 0)
+				moveTo(getX(), getY() - 1);
 			break;
 		case left:
-			moveTo(getX() - 1, getY());
+			if (getX() > 0)
+				moveTo(getX() - 1, getY());
 			break;
 		case right:
-			moveTo(getX() + 1, getY());
+			if (getX() < 60)
+				moveTo(getX() + 1, getY());
 			break;
 		}
 		if (!m_shotFlag){
@@ -261,10 +252,6 @@ void Boulder::doSomething()
 			{
 				getWorld()->playSound(SOUND_FALLING_ROCK);
 				m_soundCheck = true;
-			}
-			if (isFalling() && isBelow(getDigger()))
-			{
-				getDigger()->setDead(true);
 			}
 		}
 	}
@@ -316,13 +303,12 @@ bool Boulder::delay()
 	if (getWorld()->getTicks() - m_delayTicks < 20)
 		return false;
 	else
-	{
-		m_Falling = true;
 		return true;
-	}
 }
 void Boulder::fall()
 {
+	if (isBelow(getDigger()))
+		getDigger()->setDead(true);
 	if (getY() > 0)
 		moveTo(getX(), getY() - 1);
 	if (isDirtBelow() || getX() == 0)
@@ -330,6 +316,7 @@ void Boulder::fall()
 		setDead(true);
 		setVisible(false);
 	}
+	(*getWorld()->getRunawayGrid())[getY()][getX()]->setWalkFlag(true);
 }
 bool Boulder::isDiggerBelow()
 {
@@ -399,6 +386,7 @@ void DiggerMan::diggerAction()
 					moveTo(getX(), getY() + 1);
 				if (!getWorld()->containsSquare(getX(), getY()))
 					getWorld()->getEmptySquares()->emplace_back(getX(), getY());
+				(*getWorld()->getRunawayGrid())[getY()][getX()]->setWalkFlag(true);
 			}
 			break;
 		case KEY_PRESS_DOWN:
@@ -410,6 +398,7 @@ void DiggerMan::diggerAction()
 					moveTo(getX(), getY() - 1);
 				if (!getWorld()->containsSquare(getX(), getY()))
 					getWorld()->getEmptySquares()->emplace_back(getX(), getY());
+				(*getWorld()->getRunawayGrid())[getY()][getX()]->setWalkFlag(true);
 			}
 			break;
 		case KEY_PRESS_LEFT:
@@ -421,6 +410,7 @@ void DiggerMan::diggerAction()
 					moveTo(getX() - 1, getY());
 				if (!getWorld()->containsSquare(getX(), getY()))
 					getWorld()->getEmptySquares()->emplace_back(getX(), getY());
+				(*getWorld()->getRunawayGrid())[getY()][getX()]->setWalkFlag(true);
 			}
 			break;
 		case KEY_PRESS_RIGHT:
@@ -432,6 +422,7 @@ void DiggerMan::diggerAction()
 					moveTo(getX() + 1, getY());
 				if (!getWorld()->containsSquare(getX(), getY()))
 					getWorld()->getEmptySquares()->emplace_back(getX(), getY());
+				(*getWorld()->getRunawayGrid())[getY()][getX()]->setWalkFlag(true);
 			}
 			break;
 		case KEY_PRESS_TAB:
@@ -491,28 +482,20 @@ void Protester::doSomething()
 {
 	if (isDead())
 		return;
-<<<<<<< HEAD
-	if (getHealth() == 0)
-	{
-		setDead(true);
-		setLeaveState(true);
-		getWorld()->playSound(SOUND_PROTESTER_GIVE_UP);
-		setLeaveState(true);
-	}
 	if (getLeaveState())
 	{
 		leave();
 		return;
 	}
+	if (getHealth() == 0)
+	{
+		setLeaveState(true);
+		getWorld()->playSound(SOUND_PROTESTER_GIVE_UP);
+	}
 	if (isStunned())
 	{
 		stunned();
 		return;
-=======
-	if (getLeaveState())
-	{
-
->>>>>>> origin/master
 	}
 	if (getDigger()->getX() == getX())
 	{
@@ -541,11 +524,7 @@ void Protester::doSomething()
 		}
 	}
 
-<<<<<<< HEAD
 	if (!isWaiting())
-=======
-	if (!getWaitState())
->>>>>>> origin/master
 	{
 		if (getTickCount() % (getWaitDuration() + 1) == 0)
 		{
@@ -578,7 +557,7 @@ void Protester::protesterAction(Direction dir)
 		{
 			if (getDirection() != up)
 				setDirection(up);
-			if (!isTypeActorInFront(up, dirt) || !isTypeActorInFront(up, boulder))
+			if (!isTypeActorInFront(up, dirt) && !isTypeActorInFront(up, boulder))
 			{
 				moveTo(getX(), getY() + 1);
 				incSquaresWalked();
@@ -590,7 +569,7 @@ void Protester::protesterAction(Direction dir)
 		{
 			if (getDirection() != down)
 				setDirection(down);
-			if (!isTypeActorInFront(down, dirt) || !isTypeActorInFront(down, boulder))
+			if (!isTypeActorInFront(down, dirt) && !isTypeActorInFront(down, boulder))
 			{
 				moveTo(getX(), getY() - 1);
 				incSquaresWalked();
@@ -602,7 +581,7 @@ void Protester::protesterAction(Direction dir)
 		{
 			if (getDirection() != left)
 				setDirection(left);
-			if (!isTypeActorInFront(left, dirt) || !isTypeActorInFront(left, boulder))
+			if (!isTypeActorInFront(left, dirt) && !isTypeActorInFront(left, boulder))
 			{
 				moveTo(getX() - 1, getY());
 				incSquaresWalked();
@@ -614,7 +593,7 @@ void Protester::protesterAction(Direction dir)
 		{
 			if (getDirection() != right)
 				setDirection(right);
-			if (!isTypeActorInFront(right, dirt) || !isTypeActorInFront(right, boulder))
+			if (!isTypeActorInFront(right, dirt) && !isTypeActorInFront(right, boulder))
 			{
 				moveTo(getX() + 1, getY());
 				incSquaresWalked();
@@ -626,6 +605,7 @@ void Protester::protesterAction(Direction dir)
 	{
 		getWorld()->playSound(SOUND_PROTESTER_YELL);
 		getDigger()->setHealth(20);
+		setStunned(true);
 		return;
 	}
 }
@@ -645,14 +625,6 @@ auto Protester::checkIfClear(Direction dir)->bool
 	case up:
 		if (getY() < 56)
 		{
-			/*for (int u = getY(); u != getDigger()->getY(); u++)
-			{
-			moveTo(getX(), u);
-			if (isTypeActorInFront(up, dirt) || isTypeActorInFront(up, boulder))
-			{
-			flag = false;
-			}
-			}*/
 			for (int k = 0; k < getWorld()->getBoulder(); k++)
 			{
 				if (!actors[k]->isDead() && actors[k]->getX() == getX() && actors[k]->getY() < getDigger()->getY() && actors[k]->getY() > getY())
@@ -671,14 +643,6 @@ auto Protester::checkIfClear(Direction dir)->bool
 	case down:
 		if (getY() > 0)
 		{
-			/*for (int i = getY(); i != getDigger()->getY(); i--)
-			{
-			moveTo(getX(), i);
-			if (isTypeActorInFront(down, dirt) || isTypeActorInFront(down, boulder))
-			{
-			flag = false;
-			}
-			}*/
 			for (int k = 0; k < getWorld()->getBoulder(); k++)
 			{
 				if (!actors[k]->isDead() && actors[k]->getX() == getX() && actors[k]->getY() > getDigger()->getY() && actors[k]->getY() < getY())
@@ -697,14 +661,6 @@ auto Protester::checkIfClear(Direction dir)->bool
 	case left:
 		if (getX() > 0 && getY() < 56)
 		{
-			/*for (int i = getX(); i != getDigger()->getX(); i--)
-			{
-			moveTo(i, getY());
-			if (isTypeActorInFront(left, dirt) || isTypeActorInFront(left, boulder))
-			{
-			flag = false;
-			}
-			}*/
 			for (int k = 0; k < getWorld()->getBoulder(); k++)
 			{
 				if (!actors[k]->isDead() && actors[k]->getY() == getY() && actors[k]->getX() > getDigger()->getX() && actors[k]->getX() < getX())
@@ -714,7 +670,7 @@ auto Protester::checkIfClear(Direction dir)->bool
 			{
 				for (int j = 0; j < 4; j++)
 				{
-					if (!(*dirt)[d][getX() + j]->isDead())
+					if (!(*dirt)[getY() + j][d]->isDead())
 						flag = false;
 				}
 			}
@@ -723,14 +679,6 @@ auto Protester::checkIfClear(Direction dir)->bool
 	case right:
 		if (getX() < 59 && getY() < 56)
 		{
-			/*for (int i = getX(); i != getDigger()->getX(); i++)
-			{
-			moveTo(i, getY());
-			if (isTypeActorInFront(right, dirt) || isTypeActorInFront(right, boulder))
-			{
-			flag = false;
-			}
-			}*/
 			for (int k = 0; k < getWorld()->getBoulder(); k++)
 			{
 				if (!actors[k]->isDead() && actors[k]->getY() == getY() && actors[k]->getX() < getDigger()->getX() && actors[k]->getX() > getX())
@@ -742,14 +690,13 @@ auto Protester::checkIfClear(Direction dir)->bool
 					break;
 				for (int j = 0; j < 4; j++)
 				{
-					if (!(*dirt)[d][getX() + j]->isDead())
+					if (!(*dirt)[getY() + j][d]->isDead())
 						flag = false;
 				}
 			}
 		}
 		break;
 	}
-	//moveTo(currentX, currentY);
 	return flag;
 }
 auto Protester::type(ActorType ty)->bool
@@ -778,8 +725,89 @@ auto Protester::initStunDuration()->void
 
 auto Protester::leave()->void
 {
-	getWorld()->getShortestPathOut(getX(), getY());
+	if (!updated())
+	{
+		getWorld()->updateRunGrid(getX(), getY());
+		fillLeaveQueue(getX(), getY());
+		m_updated = true;
+	}
+	if (updated())
+	{
+		moveOut();
+	}
 }
+auto Protester::moveOut()->void
+{
+	if (getX() == 60 && getY() == 60)
+	{
+		setDead(true);
+		setVisible(false);
+		getWorld()->decProtCount();
+		return;
+	}
+	if (!m_leaveQ.empty())
+	{
+		switch (m_leaveQ.front())
+		{
+		case up:
+			if(getDirection() != up)
+				setDirection(up);
+			moveTo(getX(), getY() + 1);
+			break;
+		case down:
+			if (getDirection() != down)
+				setDirection(down);
+			moveTo(getX(), getY() - 1);
+			break;
+		case left:
+			if (getDirection() != left)
+				setDirection(left);
+			moveTo(getX() - 1, getY());
+			break;
+		case right:
+			if (getDirection() != right)
+				setDirection(right);
+			moveTo(getX() + 1, getY());
+			break;
+		}
+		m_leaveQ.pop();
+	}
+}
+auto Protester::fillLeaveQueue(int x, int y)->void
+{
+	//!(x==60 && y + 1 == 60)
+	std::shared_ptr<RunawayBox> currentBox = (*getWorld()->getRunawayGrid())[y][x];
+	while (currentBox->getDistance() > 0)
+	{
+		currentBox = (*getWorld()->getRunawayGrid())[y][x];
+		if (y < 60 && (*getWorld()->getRunawayGrid())[y + 1][x]->getDistance() == currentBox->getDistance() - 1)
+		{
+			m_leaveQ.push(up);
+			y++;
+			continue;
+		}
+		if (x > 0 && (*getWorld()->getRunawayGrid())[y][x - 1]->getDistance() == currentBox->getDistance() - 1)
+		{
+			m_leaveQ.push(left);
+			x--;
+			continue;
+		}
+		if (x < 60 && (*getWorld()->getRunawayGrid())[y][x + 1]->getDistance() == currentBox->getDistance() - 1)
+		{
+			m_leaveQ.push(right);
+			x++;
+			continue;
+		}
+		if (y > 0 && (*getWorld()->getRunawayGrid())[y - 1][x]->getDistance() == currentBox->getDistance() - 1)
+		{
+			m_leaveQ.push(down);
+			y--;
+			continue;
+		}
+		
+	}
+}
+
 auto Protester::stunned()->void
 {
 	if (m_stun_ticks == 0)
@@ -822,7 +850,6 @@ void Nugget::doSomething()
 			{
 				setVisible(true);
 			}
-<<<<<<< HEAD
 		}
 		else if (!isPickedUp())
 		{
@@ -831,16 +858,6 @@ void Nugget::doSomething()
 				setVisible(true);
 			}
 		}
-=======
-		}
-		else if (!isPickedUp())
-		{
-			if (distanceFromActor(getDigger()) < 7)
-			{
-				setVisible(true);
-			}
-		}
->>>>>>> origin/master
 		if (distanceFromActor(getDigger()) <= 3)
 			getPickedUp();
 		if (isPickedUp())
@@ -859,14 +876,11 @@ void Nugget::doSomething()
 				getPickedUp();
 				getWorld()->playSound(SOUND_PROTESTER_FOUND_GOLD);
 				p->incGold();
-<<<<<<< HEAD
 				p->setStunned(true);
-=======
->>>>>>> origin/master
 				if (p->type(regular))
 				{
 					if (p->getGold() > 3)
-						p->leave();
+						p->setLeaveState(true);
 				}
 			}
 		}
