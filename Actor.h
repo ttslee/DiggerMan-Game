@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <string>
 #include <cassert>
+#include <queue>
 using namespace std::chrono;
 enum ActorType {
 	digger, boulder, water, gold, oil, sonar, squirt, hardcore, regular, protester, dirt
@@ -27,17 +28,17 @@ public:
 	virtual void doSomething() = 0;
 	virtual bool clearDirt();
 	virtual bool isDirt();
-	void setDead(bool state)
-	{
-		m_isDead = state;
+	void setDead(bool state)	
+	{ 
+		m_isDead = state; 
 	}
 	const bool isDead()
 	{
-		return m_isDead;
+		return m_isDead; 
 	}
-	StudentWorld* getWorld()
+	StudentWorld* getWorld()	
 	{
-		return m_student_world;
+		return m_student_world; 
 	}
 	std::shared_ptr<DiggerMan> getDigger();
 	double distanceFromActor(std::shared_ptr<Actor>);
@@ -75,18 +76,18 @@ public:
 		std::cout << "Boulder Created" << std::endl;
 	}
 	virtual void doSomething();
-
+	
 	auto setFalling(bool flag)->void
 	{
 		m_Falling = flag;
 	}
-	auto isFalling()->bool
-	{
-		return m_Falling;
+	auto isFalling()->bool 
+	{ 
+		return m_Falling; 
 	}
-	auto setBelowFlag(bool flag)->void
+	auto setBelowFlag(bool flag)->void 
 	{
-		m_belowFlag = flag;
+		m_belowFlag = flag; 
 	}
 private:
 	auto isDirtBelow()->bool;
@@ -131,7 +132,7 @@ public:
 	{
 		m_shotFlag = flag;
 	}
-
+	
 private:
 	bool m_shotFlag;
 	int m_distance;
@@ -146,11 +147,7 @@ public:
 		m_gunFlag(false),
 		m_sonarFlag(false),
 		m_health(100),
-<<<<<<< HEAD
 		m_numSquirts(100),
-=======
-		m_numSquirts(5),
->>>>>>> origin/master
 		m_digFlag(true),
 		m_gold(0),
 		m_sonarCount(0)
@@ -171,13 +168,13 @@ public:
 	{
 		m_gold--;
 	}
-	void incGold()
+	void incGold() 
 	{
-		m_gold++;
+		m_gold++; 
 	}
 	void incWater()
 	{
-		m_numSquirts += 5;
+		m_numSquirts += 5; 
 	}
 	void incSonar()
 	{
@@ -227,7 +224,7 @@ private:
 	int	 m_health;
 	int	 m_numSquirts;
 	int  m_gold;
-
+	
 };
 
 //*********************PROTESTERS**************************
@@ -241,9 +238,11 @@ public:
 		m_tick_count(1),
 		m_current_dir(left),
 		m_squares_walked(1),
-		m_leave_state(false),
+		m_stun_ticks(0),
+		m_leave_state(false), 
 		m_wait_state(false),
-		m_stunned(false)
+		m_stunned(false),
+		m_updated(false)
 	{
 		setVisible(true);
 		initWaitTicks();
@@ -289,11 +288,7 @@ public:
 	{
 		return m_health;
 	}
-<<<<<<< HEAD
 	auto isWaiting()->bool
-=======
-	auto getWaitState()->bool
->>>>>>> origin/master
 	{
 		return m_wait_state;
 	}
@@ -305,14 +300,10 @@ public:
 	{
 		return m_leave_state;
 	}
-<<<<<<< HEAD
 	auto isStunned()->bool
 	{
 		return m_stunned;
 	}
-=======
-
->>>>>>> origin/master
 	auto setLeaveState(bool flag)->void
 	{
 		m_leave_state = flag;
@@ -325,7 +316,6 @@ public:
 	{
 		m_wait_state = flag;
 	}
-<<<<<<< HEAD
 	auto setWaitDuration(int dur)->void
 	{
 		m_wait_duration = dur;
@@ -334,9 +324,6 @@ public:
 	{
 		m_stunned = flag;
 	}
-=======
-	auto setWaitDuration(int)->void;
->>>>>>> origin/master
 
 	auto initWalkDistance()->void;
 	auto initWaitTicks()->void;
@@ -344,6 +331,9 @@ public:
 	auto type(ActorType)->bool;
 	auto stunned()->void;
 	auto leave()->void;
+	auto moveOut()->void;
+	auto fillLeaveQueue(int, int)->void;
+	auto updated()->bool{ return m_updated; }
 	Direction findNewDirection();
 	auto checkIfClear(Direction)->bool;
 private:
@@ -356,15 +346,14 @@ private:
 	int m_squares_walked;
 	int m_wait_duration;
 	int m_stun_duration;
-<<<<<<< HEAD
 	int m_stun_ticks;
-=======
->>>>>>> origin/master
 	Direction m_current_dir;
 
 	bool m_leave_state;
 	bool m_wait_state;
 	bool m_stunned;
+	bool m_updated;
+	std::queue<Direction> m_leaveQ;
 };
 
 
@@ -400,13 +389,13 @@ public:
 	{
 	}
 	virtual void doSomething(){}
-	void setDiggerState(bool state)
-	{
-		m_digger_state = state;
+	void setDiggerState(bool state)		
+	{ 
+		m_digger_state = state; 
 	}
-	void setProtesterState(bool state)
-	{
-		m_protester_state = state;
+	void setProtesterState(bool state)	
+	{ 
+		m_protester_state = state; 
 	}
 
 	const bool getDiggerState()
@@ -419,9 +408,9 @@ public:
 	}
 	void getPickedUp();
 	void setPickedUp(bool flag);
-	bool isPickedUp()
-	{
-		return m_pickedUp;
+	bool isPickedUp()					
+	{ 
+		return m_pickedUp; 
 	}
 
 private:
@@ -437,7 +426,7 @@ public:
 	Nugget(StudentWorld* sw, int startX, int startY, bool setV = false, bool digSt = true, bool protSt = false) :
 		Goodie(sw, IMID_GOLD, startX, startY, 2, digSt, protSt)
 	{
-		setVisible(setV);
+		setVisible(setV); 
 	}
 	virtual void doSomething();
 };
@@ -448,7 +437,7 @@ public:
 	Oil(StudentWorld* sw, int startX, int startY) :
 		Goodie(sw, IMID_BARREL, startX, startY)
 	{
-		setVisible(false);
+		setVisible(false); 
 	}
 	virtual void doSomething();
 };
