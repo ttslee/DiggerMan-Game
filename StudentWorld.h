@@ -8,9 +8,9 @@ class RunawayBox
 {
 public:
 	RunawayBox(int xCoord, int yCoord, bool canWalk) :
-		x(xCoord), 
-		y(yCoord), 
-		m_walkFlag(canWalk), 
+		x(xCoord),
+		y(yCoord),
+		m_walkFlag(canWalk),
 		distanceFromStart(0)
 	{
 	}
@@ -59,33 +59,33 @@ public:
 	{
 		return m_diggerMan;
 	}
-	std::vector<std::shared_ptr<Protester>>			getProtesters()	
-	{ 
-		return m_protesters; 
-	}
-	std::vector<std::shared_ptr<Actor>>				getActors()		
+	std::vector<std::shared_ptr<Protester>>			getProtesters()
 	{
-		return m_actors; 
+		return m_protesters;
 	}
-	std::vector<std::vector<std::unique_ptr<Dirt>>> *getDirt()		
-	{ 
-		return &m_dirt; 
+	std::vector<std::shared_ptr<Actor>>				getActors()
+	{
+		return m_actors;
+	}
+	std::vector<std::vector<std::unique_ptr<Dirt>>> *getDirt()
+	{
+		return &m_dirt;
 	}
 	std::vector<std::vector<std::shared_ptr<RunawayBox>>> *getRunawayGrid()
 	{
 		return &m_runGrid;
 	}
-	const int getDiggerHealth() const										
+	const int getDiggerHealth() const
 	{
-		return m_diggerMan->getHealth(); 
+		return m_diggerMan->getHealth();
 	}
-	const int getNumSquirtsLeft() const									
+	const int getNumSquirtsLeft() const
 	{
-		return m_diggerMan->getNumSquirts(); 
+		return m_diggerMan->getNumSquirts();
 	}
-	const int getTicks() const											
+	const int getTicks() const
 	{
-		return m_ticks; 
+		return m_ticks;
 	}
 	const int getBoulder() const
 	{
@@ -100,8 +100,8 @@ public:
 		return m_oilCount;
 	}
 	void updateRunGrid(int x, int y);
-	void decOil()													
-	{ 
+	void decOil()
+	{
 		m_oilCount--;
 	}
 	void setMaxProt();

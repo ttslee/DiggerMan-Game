@@ -53,10 +53,10 @@ int StudentWorld::init()
 
 int StudentWorld::move()
 {
-	
+
 	if (!m_diggerMan->isDead())
 	{
-		//high_resolution_clock::time_point t1 = high_resolution_clock::now();
+		high_resolution_clock::time_point t1 = high_resolution_clock::now();
 		incTicks();
 		setGameStatText(formatGameStats());
 		if (m_oilCount == 0)
@@ -95,10 +95,10 @@ int StudentWorld::move()
 				p->doSomething();
 		}
 		getDiggerMan()->setSonarFlag(false);
-		/*high_resolution_clock::time_point t2 = high_resolution_clock::now();
-		auto duration = duration_cast<milliseconds>(t2 - t1).count();*/
+		high_resolution_clock::time_point t2 = high_resolution_clock::now();
+		auto duration = duration_cast<nanoseconds>(t2 - t1).count();
 
-		/*std::cout << duration;*/
+		std::cout << duration;
 		return GWSTATUS_CONTINUE_GAME;
 	}
 	else
@@ -110,7 +110,7 @@ int StudentWorld::move()
 			playSound(SOUND_PLAYER_GIVE_UP);
 		return GWSTATUS_PLAYER_DIED;
 	}
-	
+
 }
 
 void StudentWorld::cleanUp()
@@ -130,14 +130,14 @@ void StudentWorld::cleanUp()
 	m_emptySquares.clear();
 }
 
-std::string StudentWorld::formatGameStats() const 
+std::string StudentWorld::formatGameStats() const
 {
 	ostringstream os;
 
 	os << left << "Lvl: " << setw(2) << getLevel() << " Hlth: " << setw(3) << m_diggerMan->getHealth() << "% Wtr: "
 		<< setw(2) << (m_diggerMan->getNumSquirts() * 10) << " Gld: " << setw(2) << m_diggerMan->getGold()
 		<< " Sonar: " << setw(2) << m_diggerMan->getSonarCount() << " Oil Left: " << setw(2) << getOil()
-		<< " Scr: " << setfill('0') << setw(6) << getScore();
+		<< " Scr: " << right << setfill('0') << setw(6) << getScore();
 
 	return os.str();
 }
@@ -235,7 +235,7 @@ void StudentWorld::fillDirt() {
 	for (int i = 0; i < 60; i++)
 	{
 		m_dirt.push_back(std::vector<std::unique_ptr<Dirt>>());
-		for (int j = 0; j < 64; j++) 
+		for (int j = 0; j < 64; j++)
 		{
 			if ((i >= 4) && (j >= 30 && j <= 33))
 			{
@@ -246,6 +246,7 @@ void StudentWorld::fillDirt() {
 		}
 	}
 }
+
 void StudentWorld::fillRunawayGrid()
 {
 	for (int i = 0; i < 61; i++)
@@ -316,9 +317,9 @@ void StudentWorld::updateRunGrid(int x, int y)
 				break;
 		}
 	}
-	m_runGrid[60][60]->setDistance(0); 
-	while (!run_q.empty())
-		run_q.pop();
+	m_runGrid[60][60]->setDistance(0);
+	///*while (!run_q.empty())
+	//	run_q.pop();*/
 	high_resolution_clock::time_point t2 = high_resolution_clock::now();
 	auto duration = duration_cast<milliseconds>(t2 - t1).count();
 	std::cout << duration;
@@ -352,7 +353,6 @@ void StudentWorld::initProbHard()
 {
 	m_probHard = min(90, static_cast<int>(getLevel()) * 10 + 30);
 }
-
 void StudentWorld::initNumBould()
 {
 	m_boulderCount = min(static_cast<int>(getLevel()) / 2 + 2, 7);
@@ -369,7 +369,7 @@ void StudentWorld::initProbGoodie()
 {
 	m_probGoodie = getLevel() * 25 + 300;
 }
-void StudentWorld::incTicks() 
+void StudentWorld::incTicks()
 {
 	m_ticks++;
 }

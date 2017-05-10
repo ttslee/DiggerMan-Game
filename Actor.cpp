@@ -102,8 +102,11 @@ bool Actor::isTypeActorInFront(Direction dir, ActorType type)
 	case protester:
 		for (auto & p : getWorld()->getProtesters())
 		{
+			if (p->isDead())
+				continue;
 			if (distanceFromActor(p) < 4)
 			{
+				p->decHealth();
 				p->decHealth();
 				p->setStunned(true);
 				getWorld()->playSound(SOUND_PROTESTER_ANNOYED);
@@ -192,15 +195,14 @@ void Squirt::doSomething()
 	{
 		setVisible(false);
 		setDead(true);
-		getWorld()->getEmptySquares()->emplace_back(getX(), getY());
 		return;
 	}
-	if (m_distance <= 10)
+	if (m_distance < 4)
 	{
 		switch (getDirection())
 		{
 		case up:
-			if (getY() == 60)
+			if (getY() < 60)
 				moveTo(getX(), getY() + 1);
 			break;
 		case down:
@@ -217,7 +219,6 @@ void Squirt::doSomething()
 			break;
 		}
 		if (!m_shotFlag){
-			getWorld()->playSound(SOUND_PLAYER_SQUIRT);
 			setShotFlag(true);
 		}
 		incDistance();
@@ -309,6 +310,14 @@ void Boulder::fall()
 {
 	if (isBelow(getDigger()))
 		getDigger()->setDead(true);
+	for (auto p : getWorld()->getProtesters())
+	{
+		if (isBelow(p))
+		{
+			p->setLeaveState(true);
+			getWorld()->increaseScore(500);
+		}
+	}
 	if (getY() > 0)
 		moveTo(getX(), getY() - 1);
 	if (isDirtBelow() || getX() == 0)
@@ -456,22 +465,23 @@ void DiggerMan::shoot()
 		switch (getDirection())
 		{
 		case up:
-			m_gun = std::make_shared<Squirt>(getWorld(), getX(), getY() + 1, up);
+			m_gun = std::make_shared<Squirt>(getWorld(), getX(), getY() + 4, up);
 			getWorld()->addActor(m_gun);
 			break;
 		case down:
-			m_gun = std::make_shared<Squirt>(getWorld(), getX(), getY() - 1, down);
+			m_gun = std::make_shared<Squirt>(getWorld(), getX(), getY() - 4, down);
 			getWorld()->addActor(m_gun);
 			break;
 		case left:
-			m_gun = std::make_shared<Squirt>(getWorld(), getX() - 1, getY(), left);
+			m_gun = std::make_shared<Squirt>(getWorld(), getX() - 4, getY(), left);
 			getWorld()->addActor(m_gun);
 			break;
 		case right:
-			m_gun = std::make_shared<Squirt>(getWorld(), getX() + 1, getY(), right);
+			m_gun = std::make_shared<Squirt>(getWorld(), getX() + 4, getY(), right);
 			getWorld()->addActor(m_gun);
 			break;
 		}
+		getWorld()->playSound(SOUND_PLAYER_SQUIRT);
 		m_gun->setVisible(true);
 		decSquirts();
 	}
@@ -487,10 +497,9 @@ void Protester::doSomething()
 		leave();
 		return;
 	}
-	if (getHealth() == 0)
+	if (getHealth() <= 0)
 	{
 		setLeaveState(true);
-		getWorld()->playSound(SOUND_PROTESTER_GIVE_UP);
 	}
 	if (isStunned())
 	{
@@ -502,12 +511,19 @@ void Protester::doSomething()
 		if (getDigger()->getY() > getY())
 		{
 			if (checkIfClear(up))
+			{
 				setDirection(up);
+			}
+
 		}
 		else
 		{
 			if (checkIfClear(down))
+			{
 				setDirection(down);
+				setSquaresWalked(1);
+			}
+
 		}
 	}
 	else if (getDigger()->getY() == getY())
@@ -515,12 +531,20 @@ void Protester::doSomething()
 		if (getDigger()->getX() < getX())
 		{
 			if (checkIfClear(left))
+			{
 				setDirection(left);
+				setSquaresWalked(1);
+			}
+
 		}
 		else
 		{
 			if (checkIfClear(right))
+			{
 				setDirection(right);
+				setSquaresWalked(1);
+			}
+
 		}
 	}
 
@@ -535,7 +559,7 @@ void Protester::doSomething()
 		if (getSquaresWalked() % (getMaxSquares() + 1) == 0)
 		{
 			setSquaresWalked(1);
-			protesterAction(getDirection());
+			protesterAction(findNewDirection());
 		}
 		else
 			protesterAction(getDirection());
@@ -560,7 +584,6 @@ void Protester::protesterAction(Direction dir)
 			if (!isTypeActorInFront(up, dirt) && !isTypeActorInFront(up, boulder))
 			{
 				moveTo(getX(), getY() + 1);
-				incSquaresWalked();
 			}
 		}
 		break;
@@ -572,7 +595,6 @@ void Protester::protesterAction(Direction dir)
 			if (!isTypeActorInFront(down, dirt) && !isTypeActorInFront(down, boulder))
 			{
 				moveTo(getX(), getY() - 1);
-				incSquaresWalked();
 			}
 		}
 		break;
@@ -584,7 +606,6 @@ void Protester::protesterAction(Direction dir)
 			if (!isTypeActorInFront(left, dirt) && !isTypeActorInFront(left, boulder))
 			{
 				moveTo(getX() - 1, getY());
-				incSquaresWalked();
 			}
 		}
 		break;
@@ -596,11 +617,11 @@ void Protester::protesterAction(Direction dir)
 			if (!isTypeActorInFront(right, dirt) && !isTypeActorInFront(right, boulder))
 			{
 				moveTo(getX() + 1, getY());
-				incSquaresWalked();
 			}
 		}
 		break;
 	}
+	incSquaresWalked();
 	if (isTypeActorInFront(getDirection(), digger))
 	{
 		getWorld()->playSound(SOUND_PROTESTER_YELL);
@@ -611,7 +632,56 @@ void Protester::protesterAction(Direction dir)
 }
 GraphObject::Direction Protester::findNewDirection()
 {
-	return m_current_dir;
+	Direction d = getDirection();
+	bool canWalk = false;
+	while (!canWalk)
+	{
+		switch (rand() % 4 + 1)
+		{
+		case up:
+			if (getY() < 60)
+			{
+				if (!isTypeActorInFront(up, dirt) && !isTypeActorInFront(up, boulder))
+				{
+					d = up;
+					canWalk = true;
+				}
+			}
+			break;
+		case down:
+			if (getY() > 0)
+			{
+				if (!isTypeActorInFront(down, dirt) && !isTypeActorInFront(down, boulder))
+				{
+					d = down;
+					canWalk = true;
+				}
+			}
+			break;
+		case left:
+			if (getX() > 0)
+			{
+				if (!isTypeActorInFront(left, dirt) && !isTypeActorInFront(left, boulder))
+				{
+					d = left;
+					canWalk = true;
+				}
+			}
+			break;
+		case right:
+			if (getX() < 60)
+			{
+				if (!isTypeActorInFront(right, dirt) && !isTypeActorInFront(right, boulder))
+				{
+					d = right;
+					canWalk = true;
+				}
+			}
+			break;
+		}
+	}
+	initWalkDistance();
+	return d;
 }
 auto Protester::checkIfClear(Direction dir)->bool
 {
@@ -712,7 +782,7 @@ auto Protester::type(ActorType ty)->bool
 }
 auto Protester::initWalkDistance()->void
 {
-	m_max_squares = rand() % 61;
+	m_max_squares = rand() % 55 + 8;
 }
 auto Protester::initWaitTicks()->void
 {
@@ -727,6 +797,11 @@ auto Protester::leave()->void
 {
 	if (!updated())
 	{
+		if (type(regular))
+			getWorld()->increaseScore(100);
+		else
+			getWorld()->increaseScore(250);
+		getWorld()->playSound(SOUND_PROTESTER_GIVE_UP);
 		getWorld()->updateRunGrid(getX(), getY());
 		fillLeaveQueue(getX(), getY());
 		m_updated = true;
@@ -750,7 +825,7 @@ auto Protester::moveOut()->void
 		switch (m_leaveQ.front())
 		{
 		case up:
-			if(getDirection() != up)
+			if (getDirection() != up)
 				setDirection(up);
 			moveTo(getX(), getY() + 1);
 			break;
@@ -804,7 +879,7 @@ auto Protester::fillLeaveQueue(int x, int y)->void
 			y--;
 			continue;
 		}
-		
+
 	}
 }
 
@@ -820,7 +895,6 @@ auto Protester::stunned()->void
 		m_stun_ticks = 0;
 	}
 }
-
 
 //***************GOODIES*****************
 void Goodie::getPickedUp()
@@ -863,6 +937,7 @@ void Nugget::doSomething()
 		if (isPickedUp())
 		{
 			getDigger()->incGold();
+			getWorld()->increaseScore(25);
 			getWorld()->playSound(SOUND_GOT_GOODIE);
 			return;
 		}
@@ -908,10 +983,10 @@ void Oil::doSomething()
 		{
 			getWorld()->decOil();
 			getWorld()->playSound(SOUND_FOUND_OIL);
+			getWorld()->increaseScore(1000);
 		}
 	}
 }
-
 
 auto TemporaryGoodie::initLifeTicks()->void
 {
@@ -931,6 +1006,7 @@ void TemporaryGoodie::doSomething()
 			getDigger()->incWater();
 			break;
 		case IMID_SONAR:
+			getWorld()->increaseScore(75);
 			getDigger()->incSonar();
 			break;
 		}

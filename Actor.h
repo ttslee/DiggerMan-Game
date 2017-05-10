@@ -28,17 +28,17 @@ public:
 	virtual void doSomething() = 0;
 	virtual bool clearDirt();
 	virtual bool isDirt();
-	void setDead(bool state)	
-	{ 
-		m_isDead = state; 
+	void setDead(bool state)
+	{
+		m_isDead = state;
 	}
 	const bool isDead()
 	{
-		return m_isDead; 
+		return m_isDead;
 	}
-	StudentWorld* getWorld()	
+	StudentWorld* getWorld()
 	{
-		return m_student_world; 
+		return m_student_world;
 	}
 	std::shared_ptr<DiggerMan> getDigger();
 	double distanceFromActor(std::shared_ptr<Actor>);
@@ -64,7 +64,7 @@ class Boulder : public Actor
 {
 public:
 	Boulder(StudentWorld* sw, int startX, int startY) :
-		Actor(sw, IMID_BOULDER, startX, startY),
+		Actor(sw, IMID_BOULDER, startX, startY, down, 1.0, 1),
 		m_initial_dirt_flag(true),
 		m_belowFlag(true),
 		m_Falling(false),
@@ -76,18 +76,18 @@ public:
 		std::cout << "Boulder Created" << std::endl;
 	}
 	virtual void doSomething();
-	
+
 	auto setFalling(bool flag)->void
 	{
 		m_Falling = flag;
 	}
-	auto isFalling()->bool 
-	{ 
-		return m_Falling; 
-	}
-	auto setBelowFlag(bool flag)->void 
+	auto isFalling()->bool
 	{
-		m_belowFlag = flag; 
+		return m_Falling;
+	}
+	auto setBelowFlag(bool flag)->void
+	{
+		m_belowFlag = flag;
 	}
 private:
 	auto isDirtBelow()->bool;
@@ -118,7 +118,7 @@ class Squirt :public Actor
 {
 public:
 	Squirt(StudentWorld* sw, int startX, int startY, Direction dir) :
-		Actor(sw, IMID_WATER_SPURT, startX, startY, dir),
+		Actor(sw, IMID_WATER_SPURT, startX, startY, dir, 1.0, 1),
 		m_shotFlag(false),
 		m_distance(0)
 	{
@@ -132,7 +132,7 @@ public:
 	{
 		m_shotFlag = flag;
 	}
-	
+
 private:
 	bool m_shotFlag;
 	int m_distance;
@@ -168,13 +168,13 @@ public:
 	{
 		m_gold--;
 	}
-	void incGold() 
+	void incGold()
 	{
-		m_gold++; 
+		m_gold++;
 	}
 	void incWater()
 	{
-		m_numSquirts += 5; 
+		m_numSquirts += 5;
 	}
 	void incSonar()
 	{
@@ -224,22 +224,22 @@ private:
 	int	 m_health;
 	int	 m_numSquirts;
 	int  m_gold;
-	
+
 };
 
 //*********************PROTESTERS**************************
 class Protester : public Actor
 {
 public:
-	Protester(StudentWorld* sw, int imagID) :
+	Protester(StudentWorld* sw, int imagID, int health) :
 		Actor(sw, imagID, 60, 60, left, 1.0, 0),
 		m_goldCount(0),
-		m_health(5),
+		m_health(health),
 		m_tick_count(1),
 		m_current_dir(left),
 		m_squares_walked(1),
 		m_stun_ticks(0),
-		m_leave_state(false), 
+		m_leave_state(false),
 		m_wait_state(false),
 		m_stunned(false),
 		m_updated(false)
@@ -361,7 +361,7 @@ class RegularProtester : public Protester
 {
 public:
 	RegularProtester(StudentWorld* sw) :
-		Protester(sw, IMID_PROTESTER)
+		Protester(sw, IMID_PROTESTER, 5)
 	{
 	}
 	//virtual void doSomething();
@@ -371,7 +371,7 @@ class HardcoreProtester : public Protester
 {
 public:
 	HardcoreProtester(StudentWorld* sw) :
-		Protester(sw, IMID_HARD_CORE_PROTESTER)
+		Protester(sw, IMID_HARD_CORE_PROTESTER, 20)
 	{
 	}
 	//virtual void doSomething();
@@ -389,13 +389,13 @@ public:
 	{
 	}
 	virtual void doSomething(){}
-	void setDiggerState(bool state)		
-	{ 
-		m_digger_state = state; 
+	void setDiggerState(bool state)
+	{
+		m_digger_state = state;
 	}
-	void setProtesterState(bool state)	
-	{ 
-		m_protester_state = state; 
+	void setProtesterState(bool state)
+	{
+		m_protester_state = state;
 	}
 
 	const bool getDiggerState()
@@ -408,9 +408,9 @@ public:
 	}
 	void getPickedUp();
 	void setPickedUp(bool flag);
-	bool isPickedUp()					
-	{ 
-		return m_pickedUp; 
+	bool isPickedUp()
+	{
+		return m_pickedUp;
 	}
 
 private:
@@ -426,7 +426,7 @@ public:
 	Nugget(StudentWorld* sw, int startX, int startY, bool setV = false, bool digSt = true, bool protSt = false) :
 		Goodie(sw, IMID_GOLD, startX, startY, 2, digSt, protSt)
 	{
-		setVisible(setV); 
+		setVisible(setV);
 	}
 	virtual void doSomething();
 };
@@ -437,7 +437,7 @@ public:
 	Oil(StudentWorld* sw, int startX, int startY) :
 		Goodie(sw, IMID_BARREL, startX, startY)
 	{
-		setVisible(false); 
+		setVisible(false);
 	}
 	virtual void doSomething();
 };
